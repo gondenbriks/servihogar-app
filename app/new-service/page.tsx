@@ -382,33 +382,26 @@ function NewServiceContent() {
                 <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={() => router.back()}
-                    className="flex size-11 items-center justify-center rounded-2xl bg-gray-900 border border-white/5 group hover:border-white/20 transition-all"
+                    className="flex size-10 items-center justify-center rounded-xl bg-gray-900 border border-white/5 group hover:border-white/20 transition-all font-bold"
                 >
-                    <X className="text-gray-400 group-hover:text-white" size={20} />
+                    <X className="text-gray-400 group-hover:text-white" size={18} />
                 </motion.button>
 
                 <div className="text-center px-2">
-                    <h1 className="text-[11px] font-black uppercase tracking-[0.4em] text-white">Nuevo Servicio</h1>
-                    <div className="flex items-center justify-center gap-1.5 mt-1">
+                    <h1 className="text-[12px] font-black uppercase tracking-[0.3em] text-white">Nuevo Servicio</h1>
+                    <div className="flex items-center justify-center gap-1.5 mt-0.5">
                         <div className={`size-1.5 rounded-full ${userRole === 'admin' ? 'bg-[#00ff9d]' : 'bg-orange-500'} animate-pulse`} />
-                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">{userRole === 'admin' ? 'Modo Auditoría' : 'Registro Técnico'}</p>
+                        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{userRole === 'admin' ? 'Modo Admin' : 'Registro Técnico'}</p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                     <motion.button
                         whileTap={{ scale: 0.9 }}
                         onClick={resetForm}
-                        className="text-gray-500 hover:text-rose-500 transition-colors"
+                        className="flex size-10 items-center justify-center rounded-xl bg-gray-900/50 text-gray-500 hover:text-rose-500 transition-colors border border-white/5"
                     >
-                        <RefreshCcw size={18} />
-                    </motion.button>
-                    <motion.button
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => router.push('/import-center')}
-                        className="flex size-11 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all shadow-lg shadow-emerald-500/5 group"
-                    >
-                        <FileText size={20} className="group-hover:scale-110 transition-transform" />
+                        <RefreshCcw size={16} />
                     </motion.button>
                 </div>
             </header>
@@ -416,29 +409,29 @@ function NewServiceContent() {
             <main className="p-6 space-y-8 pb-32">
                 {/* Client Search Section */}
                 <section className="animate-fade-in relative">
-                    <div className="flex flex-col items-center justify-center mb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] px-1 text-center">
+                    <div className="flex flex-col items-center justify-center mb-6 text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] px-1 text-center">
                         <div className="flex items-center gap-2 mb-2">
                             <Search size={16} className="text-[#135bec]" />
-                            <span className="text-gray-400">Búsqueda de Cliente</span>
+                            <span>Información del Cliente</span>
                         </div>
                         {selectedClient && (
-                            <span className="text-[#00ff9d] bg-[#00ff9d]/5 px-4 py-1.5 rounded-full border border-[#00ff9d]/20 text-[8px] animate-pulse">✓ Cliente Vinculado Exitosamente</span>
+                            <span className="text-[#00ff9d] bg-[#00ff9d]/5 px-4 py-1.5 rounded-full border border-[#00ff9d]/20 text-[9px] animate-pulse">✓ Cliente Vinculado</span>
                         )}
                     </div>
 
-                    <div className="relative group">
+                    <div className="relative group mb-8">
                         <input
                             type="text"
-                            placeholder="Nombre o Cédula..."
+                            placeholder="Buscar por Nombre o Cédula..."
                             value={clientSearch}
                             onChange={(e) => handleSearchClients(e.target.value)}
-                            className="w-full bg-gray-900/50 border border-white/10 rounded-[1.8rem] py-4.5 pl-13 pr-4 text-sm focus:border-[#135bec] focus:bg-gray-900/80 outline-none transition-all placeholder:text-gray-600 shadow-inner h-14"
+                            className="w-full bg-gray-900/50 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm focus:border-[#135bec] focus:bg-gray-900/80 outline-none transition-all placeholder:text-gray-600 shadow-inner h-14"
                         />
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#135bec] transition-colors" size={20} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#135bec] transition-colors" size={18} />
 
                         {isSearching && (
-                            <div className="absolute right-5 top-1/2 -translate-y-1/2">
-                                <RefreshCcw size={16} className="text-[#135bec] animate-spin" />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                <RefreshCcw size={14} className="text-[#135bec] animate-spin" />
                             </div>
                         )}
 
@@ -448,15 +441,14 @@ function NewServiceContent() {
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    className="absolute top-full left-0 right-0 mt-3 bg-[#0d0f14] border border-white/10 rounded-[2.5rem] shadow-2xl z-[100] overflow-hidden p-2 backdrop-blur-3xl"
+                                    className="absolute top-full left-0 right-0 mt-3 bg-[#0d0f14] border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden p-2 backdrop-blur-3xl"
                                 >
-                                    <p className="text-[9px] font-black uppercase text-gray-600 tracking-[0.2em] mb-2 px-4 mt-2">Resultados en base de datos</p>
                                     {searchResults.map((c) => (
                                         <motion.button
                                             whileHover={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
                                             key={c.id}
                                             onClick={() => selectClient(c)}
-                                            className="w-full h-18 px-4 flex items-center gap-4 rounded-[1.8rem] transition-colors border-b border-white/5 last:border-0 mb-1"
+                                            className="w-full h-18 px-4 flex items-center gap-4 rounded-xl transition-colors border-b border-white/5 last:border-0 mb-1"
                                         >
                                             <div className="size-11 rounded-2xl bg-[#135bec]/10 border border-[#135bec]/20 flex items-center justify-center font-black text-[#135bec] text-xs">
                                                 {c.full_name?.substring(0, 2).toUpperCase()}
@@ -475,66 +467,78 @@ function NewServiceContent() {
                         </AnimatePresence>
                     </div>
 
-                    <div className="mt-8 space-y-4">
-                        <div className="relative group">
-                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#135bec] transition-all duration-300">
-                                <User size={18} />
+                    <div className="space-y-4">
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Nombre Completo *</label>
+                            <div className="relative group">
+                                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#135bec] transition-all duration-300">
+                                    <User size={18} />
+                                </div>
+                                <input
+                                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-14 pr-4 text-sm focus:border-[#135bec] focus:bg-white/[0.05] focus:shadow-[0_0_20px_rgba(19,91,236,0.1)] outline-none transition-all font-bold placeholder:text-gray-600 h-16"
+                                    placeholder="Nombre del Cliente"
+                                    value={formData.full_name}
+                                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                                />
                             </div>
-                            <input
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-[1.8rem] py-5 pl-14 pr-14 text-sm focus:border-[#135bec] focus:bg-white/[0.05] focus:shadow-[0_0_20px_rgba(19,91,236,0.1)] outline-none transition-all font-bold placeholder:text-gray-600 text-center h-16"
-                                placeholder="Nombre Completo *"
-                                value={formData.full_name}
-                                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                            />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="relative group">
-                                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-[#135bec] transition-colors">
-                                    <Info size={16} />
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Identificación</label>
+                                <div className="relative group">
+                                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-[#135bec] transition-colors">
+                                        <Info size={16} />
+                                    </div>
+                                    <input
+                                        className="w-full bg-white/[0.02] border border-white/5 rounded-2xl py-4.5 pl-11 pr-4 text-sm outline-none focus:border-[#135bec] focus:bg-white/[0.04] transition-all font-bold h-14"
+                                        placeholder="ID / Cédula"
+                                        value={formData.national_id}
+                                        onChange={(e) => setFormData({ ...formData, national_id: e.target.value })}
+                                    />
                                 </div>
-                                <input
-                                    className="w-full bg-white/[0.02] border border-white/5 rounded-[1.5rem] py-4.5 pl-10 pr-4 text-sm outline-none focus:border-[#135bec] focus:bg-white/[0.04] transition-all text-center h-14"
-                                    placeholder="ID / Cédula"
-                                    value={formData.national_id}
-                                    onChange={(e) => setFormData({ ...formData, national_id: e.target.value })}
-                                />
                             </div>
-                            <div className="relative group">
-                                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-[#135bec] transition-colors">
-                                    <Smartphone size={16} />
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Teléfono</label>
+                                <div className="relative group">
+                                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-[#135bec] transition-colors">
+                                        <Smartphone size={16} />
+                                    </div>
+                                    <input
+                                        className="w-full bg-white/[0.02] border border-white/5 rounded-2xl py-4.5 pl-11 pr-4 text-sm outline-none focus:border-[#135bec] focus:bg-white/[0.04] transition-all font-bold h-14"
+                                        placeholder="WhatsApp / Celular"
+                                        value={formData.phone}
+                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    />
                                 </div>
-                                <input
-                                    className="w-full bg-white/[0.02] border border-white/5 rounded-[1.5rem] py-4.5 pl-10 pr-4 text-sm outline-none focus:border-[#135bec] focus:bg-white/[0.04] transition-all text-center h-14"
-                                    placeholder="Teléfono"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                />
                             </div>
                         </div>
 
-                        <div className="relative group">
-                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#135bec] transition-colors">
-                                <MapPin size={18} />
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Dirección de Servicio</label>
+                            <div className="relative group">
+                                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#135bec] transition-colors">
+                                    <MapPin size={18} />
+                                </div>
+                                <input
+                                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-14 pr-4 text-sm outline-none focus:border-[#135bec] focus:bg-white/[0.05] transition-all font-bold placeholder:text-gray-600 h-16"
+                                    placeholder="Ubicación Detallada"
+                                    value={formData.address}
+                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                />
                             </div>
-                            <input
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-[1.8rem] py-5 pl-14 pr-14 text-sm outline-none focus:border-[#135bec] focus:bg-white/[0.05] transition-all text-center h-16"
-                                placeholder="Dirección de Domicilio / Ubicación"
-                                value={formData.address}
-                                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                            />
                         </div>
                     </div>
                 </section>
 
                 {/* Visual Evidence Section */}
                 <section className="animate-slide-up">
-                    <div className="flex flex-col items-center justify-center mb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] text-center">
-                        <div className="flex items-center gap-2 mb-2">
+                    <div className="flex flex-col items-center justify-center mb-6 text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">
+                        <div className="flex items-center gap-2 mb-1">
                             <Camera size={16} className="text-[#135bec]" />
                             <span>Evidencia Visual</span>
                         </div>
-                        <span className="text-[8px] bg-white/5 px-3 py-1 rounded-full text-gray-600 border border-white/5">OPCIONAL</span>
+                        <span className="text-[8px] text-gray-600 font-bold tracking-[0.1em]">(OPCIONAL)</span>
                     </div>
 
                     <div className="grid grid-cols-4 gap-3">
@@ -543,39 +547,39 @@ function NewServiceContent() {
                             whileTap={{ scale: 0.95 }}
                             onClick={handlePhotoUpload}
                             disabled={isUploading}
-                            className="aspect-square rounded-[1.5rem] border-2 border-dashed border-gray-800 flex flex-col items-center justify-center gap-2 bg-gray-900/30 hover:border-[#135bec] hover:bg-[#135bec]/5 transition-all group"
+                            className="aspect-square rounded-2xl border-2 border-dashed border-gray-800 flex flex-col items-center justify-center gap-1 bg-gray-900/30 hover:border-[#135bec] hover:bg-[#135bec]/5 transition-all group"
                         >
                             <Camera size={20} className="text-gray-600 group-hover:text-[#135bec]" />
-                            <span className="text-[8px] font-black uppercase text-gray-600 group-hover:text-[#135bec]">Cámara</span>
+                            <span className="text-[8px] font-black uppercase text-gray-700 group-hover:text-[#135bec]">Cámara</span>
                         </motion.button>
 
                         <motion.button
                             whileTap={{ scale: 0.95 }}
                             onClick={handlePhotoUpload}
                             disabled={isUploading}
-                            className="aspect-square rounded-[1.5rem] border-2 border-dashed border-gray-800 flex flex-col items-center justify-center gap-2 bg-gray-900/30 hover:border-[#135bec] hover:bg-[#135bec]/5 transition-all group"
+                            className="aspect-square rounded-2xl border-2 border-dashed border-gray-800 flex flex-col items-center justify-center gap-1 bg-gray-900/30 hover:border-[#135bec] hover:bg-[#135bec]/5 transition-all group"
                         >
                             <ImageIcon size={20} className="text-gray-600 group-hover:text-[#135bec]" />
-                            <span className="text-[8px] font-black uppercase text-gray-600 group-hover:text-[#135bec]">Galería</span>
+                            <span className="text-[8px] font-black uppercase text-gray-700 group-hover:text-[#135bec]">Galería</span>
                         </motion.button>
 
                         {/* Previews */}
                         {photos.map((photo, i) => (
-                            <div key={i} className="relative aspect-square rounded-[1.5rem] overflow-hidden border border-white/10 group shadow-lg">
-                                <img src={photo} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                            <div key={i} className="relative aspect-square rounded-2xl overflow-hidden border border-white/10 group shadow-lg">
+                                <img src={photo} className="w-full h-full object-cover" />
                                 <button
                                     onClick={() => removePhoto(i)}
-                                    className="absolute top-1.5 right-1.5 size-6 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all active:scale-90"
+                                    className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
-                                    <X size={12} />
+                                    <X size={16} className="text-white" />
                                 </button>
                             </div>
                         ))}
 
                         {/* Loading State */}
                         {isUploading && (
-                            <div className="aspect-square rounded-[1.5rem] bg-gray-900/50 border border-white/5 flex items-center justify-center">
-                                <RefreshCcw size={16} className="text-[#135bec] animate-spin" />
+                            <div className="aspect-square rounded-2xl bg-gray-900/50 border border-white/5 flex items-center justify-center">
+                                <RefreshCcw size={14} className="text-[#135bec] animate-spin" />
                             </div>
                         )}
                     </div>
@@ -583,40 +587,46 @@ function NewServiceContent() {
 
                 {/* Date & Time */}
                 <section>
-                    <div className="flex flex-col items-center justify-center mb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] text-center">
+                    <div className="flex flex-col items-center justify-center mb-6 text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">
                         <div className="flex items-center gap-2">
                             <Calendar size={16} className="text-[#00ff9d]" />
-                            <span>Programación</span>
+                            <span>Programación de Visita</span>
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="relative">
-                            <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
-                            <input
-                                type="date"
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-12 pr-4 text-sm color-scheme-dark text-center h-16"
-                                value={formData.date}
-                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                            />
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Fecha</label>
+                            <div className="relative">
+                                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                                <input
+                                    type="date"
+                                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-4.5 pl-11 pr-4 text-sm color-scheme-dark font-bold h-14"
+                                    value={formData.date}
+                                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                />
+                            </div>
                         </div>
-                        <div className="relative">
-                            <Clock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
-                            <input
-                                type="time"
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-12 pr-4 text-sm text-center h-16"
-                                value={formData.time}
-                                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                            />
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Hora</label>
+                            <div className="relative">
+                                <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                                <input
+                                    type="time"
+                                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-4.5 pl-11 pr-4 text-sm font-bold h-14"
+                                    value={formData.time}
+                                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                                />
+                            </div>
                         </div>
                     </div>
                 </section>
 
                 {/* Equipment Selection */}
                 <section className="animate-slide-up">
-                    <div className="flex flex-col items-center justify-center mb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] text-center">
+                    <div className="flex flex-col items-center justify-center mb-6 text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">
                         <div className="flex items-center gap-2">
                             <Wrench size={16} className="text-[#00d4ff]" />
-                            <span>Equipo del Servicio</span>
+                            <span>Selección de Equipo</span>
                         </div>
                     </div>
 
@@ -627,7 +637,7 @@ function NewServiceContent() {
                                     whileTap={{ scale: 0.95 }}
                                     key={eq.id}
                                     onClick={() => setSelectedEquipmentId(eq.id)}
-                                    className={`shrink-0 w-36 h-24 rounded-[2rem] border flex flex-col items-center justify-center p-3 transition-all relative overflow-hidden ${selectedEquipmentId === eq.id
+                                    className={`shrink-0 w-36 h-28 rounded-2xl border flex flex-col items-center justify-center p-3 transition-all relative overflow-hidden ${selectedEquipmentId === eq.id
                                         ? 'border-[#00d4ff] bg-[#00d4ff]/10 shadow-[0_0_20px_rgba(0,212,255,0.1)]'
                                         : 'bg-gray-900/50 border-white/5'
                                         }`}
@@ -636,33 +646,33 @@ function NewServiceContent() {
                                         <div className="absolute top-2 right-2 size-2 rounded-full bg-[#00d4ff] shadow-[0_0_10px_#00d4ff]" />
                                     )}
                                     <Smartphone className={selectedEquipmentId === eq.id ? "text-[#00d4ff]" : "text-gray-600"} size={22} />
-                                    <span className={`text-[11px] font-black mt-1 ${selectedEquipmentId === eq.id ? 'text-white' : 'text-gray-500'}`}>{eq.brand}</span>
-                                    <span className="text-[8px] text-gray-600 font-bold uppercase">{eq.type}</span>
+                                    <span className={`text-[11px] font-black mt-1 line-clamp-1 ${selectedEquipmentId === eq.id ? 'text-white' : 'text-gray-400'}`}>{eq.brand}</span>
+                                    <span className="text-[9px] text-gray-600 font-bold uppercase tracking-tight">{eq.type}</span>
                                 </motion.button>
                             ))}
                             <button
                                 onClick={() => setSelectedEquipmentId(null)}
-                                className={`shrink-0 w-36 h-24 rounded-[2rem] border-2 border-dashed flex flex-col items-center justify-center p-3 transition-all ${!selectedEquipmentId ? 'border-[#00d4ff] bg-[#00d4ff]/5' : 'border-gray-800 opacity-30 shadow-inner'}`}
+                                className={`shrink-0 w-36 h-28 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-3 transition-all ${!selectedEquipmentId ? 'border-[#00d4ff] bg-[#00d4ff]/5' : 'border-gray-800 opacity-30 shadow-inner'}`}
                             >
-                                <PlusCircle className="text-gray-500 mb-1" size={20} />
-                                <span className="text-[11px] font-bold text-gray-500">Nuevo Equipo</span>
+                                <PlusCircle className="text-gray-500 mb-1" size={24} />
+                                <span className="text-[10px] font-black text-gray-500 uppercase">Nuevo</span>
                             </button>
                         </div>
                     )}
 
                     {!selectedEquipmentId && (
-                        <div className="grid grid-cols-4 gap-3">
+                        <div className="grid grid-cols-5 gap-2">
                             {appliances.map((app) => (
                                 <motion.button
                                     whileTap={{ scale: 0.9 }}
                                     key={app.id}
                                     onClick={() => setSelectedApplianceType(app.label)}
-                                    className={`flex flex-col items-center justify-center h-22 rounded-[1.5rem] border transition-all duration-300 ${selectedApplianceType === app.label
-                                        ? 'border-[#00d4ff] bg-[#00d4ff]/10 text-white shadow-lg scale-105'
-                                        : 'bg-gray-900 border-white/5 text-gray-600 hover:text-gray-400'
+                                    className={`flex flex-col items-center justify-center h-22 rounded-2xl border transition-all duration-300 ${selectedApplianceType === app.label
+                                        ? 'border-[#00d4ff] bg-[#00d4ff]/10 text-white shadow-lg'
+                                        : 'bg-gray-900 border-white/5 text-gray-600'
                                         }`}
                                 >
-                                    <app.icon size={26} className={selectedApplianceType === app.label ? "text-[#00d4ff]" : ""} />
+                                    <app.icon size={22} className={selectedApplianceType === app.label ? "text-[#00d4ff]" : ""} />
                                     <span className="text-[8px] font-black uppercase tracking-widest mt-2">{app.label}</span>
                                 </motion.button>
                             ))}
@@ -675,42 +685,42 @@ function NewServiceContent() {
                     <motion.button
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setFormData({ ...formData, is_warranty: !formData.is_warranty })}
-                        className={`w-full flex items-center justify-between p-6 rounded-[2.5rem] border transition-all relative overflow-hidden group ${formData.is_warranty
+                        className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all relative overflow-hidden group ${formData.is_warranty
                             ? 'bg-amber-500/10 border-amber-500/30'
                             : 'bg-gray-900/40 border-white/5'
                             }`}
                     >
                         {formData.is_warranty && (
-                            <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.5)]" />
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />
                         )}
-                        <div className="flex items-center gap-4">
-                            <div className={`size-12 rounded-[1.2rem] flex items-center justify-center transition-colors ${formData.is_warranty ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-gray-800 text-gray-600'}`}>
-                                <Zap size={22} />
+                        <div className="flex items-center gap-3">
+                            <div className={`size-10 rounded-xl flex items-center justify-center transition-colors ${formData.is_warranty ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-gray-800 text-gray-600'}`}>
+                                <Zap size={18} />
                             </div>
                             <div className="text-left">
-                                <p className={`text-sm font-black uppercase tracking-tight ${formData.is_warranty ? 'text-amber-500' : 'text-gray-400'}`}>Servicio de Garantía</p>
-                                <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest mt-0.5">Cobertura por garantía vigente</p>
+                                <p className={`text-[13px] font-black uppercase tracking-tight ${formData.is_warranty ? 'text-amber-500' : 'text-gray-400'}`}>Servicio de Garantía</p>
+                                <p className="text-[9px] text-gray-600 font-bold uppercase tracking-widest mt-0.5">Sin cargo adicional para el cliente</p>
                             </div>
                         </div>
-                        <div className={`size-7 rounded-full border-2 flex items-center justify-center transition-all ${formData.is_warranty ? 'border-amber-500 bg-amber-500' : 'border-gray-700'}`}>
-                            {formData.is_warranty && <CheckCircle2 size={16} className="text-white" />}
+                        <div className={`size-6 rounded-full border flex items-center justify-center transition-all ${formData.is_warranty ? 'border-amber-500 bg-amber-500' : 'border-gray-700'}`}>
+                            {formData.is_warranty && <CheckCircle2 size={12} className="text-white" />}
                         </div>
                     </motion.button>
                 </section>
 
                 {/* Reported Issue */}
                 <section>
-                    <div className="flex flex-col items-center justify-center mb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] text-center">
+                    <div className="flex flex-col items-center justify-center mb-6 text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">
                         <div className="flex items-center gap-2">
                             <StickyNote size={16} className="text-amber-500" />
-                            <span>Falla Reportada *</span>
+                            <span>Reporte de Falla</span>
                         </div>
                     </div>
-                    <div className="relative">
+                    <div className="relative group">
                         <textarea
                             rows={4}
                             placeholder="Describa el problema detalladamente..."
-                            className="w-full bg-white/[0.02] border border-white/5 rounded-[2rem] p-6 text-sm outline-none focus:border-amber-500/50 focus:bg-white/[0.04] transition-all resize-none text-center"
+                            className="w-full bg-white/[0.02] border border-white/5 rounded-2xl p-5 text-sm outline-none focus:border-amber-500/50 focus:bg-white/[0.04] transition-all resize-none font-medium placeholder:text-gray-700 h-32"
                             value={formData.reported_issue}
                             onChange={(e) => setFormData({ ...formData, reported_issue: e.target.value })}
                         />
@@ -718,24 +728,24 @@ function NewServiceContent() {
                             whileTap={{ scale: 0.9 }}
                             type="button"
                             onClick={toggleListening}
-                            className={`absolute bottom-5 right-5 p-3.5 rounded-2xl shadow-xl transition-all ${isListening ? 'bg-[#00ff9d] text-black animate-pulse' : 'bg-[#135bec] text-white'}`}
+                            className={`absolute bottom-4 right-4 p-3 rounded-xl shadow-xl transition-all ${isListening ? 'bg-[#00ff9d] text-black animate-pulse' : 'bg-[#135bec] text-white'}`}
                         >
-                            <Mic size={20} />
+                            <Mic size={18} />
                         </motion.button>
                     </div>
                 </section>
 
                 {/* Technician Assignment */}
                 <section>
-                    <div className="flex flex-col items-center justify-center mb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] text-center">
+                    <div className="flex flex-col items-center justify-center mb-6 text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">
                         <div className="flex items-center gap-2">
                             <UserCheck size={16} className="text-indigo-400" />
-                            <span>Asignación de Técnico</span>
+                            <span>Técnico Responsable</span>
                         </div>
                     </div>
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         {technicians.length > 0 ? technicians.map((tech, idx) => {
-                            // Mock busy status for visual variety like in reference
+                            // Mock busy status for visual variety
                             const isBusy = idx === 1;
 
                             return (
@@ -745,38 +755,38 @@ function NewServiceContent() {
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: idx * 0.05 }}
                                     onClick={() => setFormData({ ...formData, technician_id: tech.id })}
-                                    className={`relative flex items-center justify-between p-5 rounded-[2rem] border cursor-pointer transition-all ${formData.technician_id === tech.id
-                                        ? 'bg-indigo-600/10 border-indigo-500 shadow-[0_10px_30px_rgba(99,102,241,0.1)]'
-                                        : 'bg-gray-900/40 border-white/5 hover:bg-white/5'
+                                    className={`relative flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${formData.technician_id === tech.id
+                                        ? 'bg-indigo-600/10 border-indigo-500 shadow-lg'
+                                        : 'bg-gray-900/40 border-white/5 hover:bg-white/10'
                                         }`}
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className={`size-12 rounded-[1.2rem] flex items-center justify-center font-black text-xs shadow-xl ${formData.technician_id === tech.id ? 'bg-indigo-500 text-white' : 'bg-gray-800 text-gray-400'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <div className={`size-10 rounded-xl flex items-center justify-center font-black text-[10px] shadow-xl ${formData.technician_id === tech.id ? 'bg-indigo-500 text-white' : 'bg-gray-800 text-gray-500'}`}>
                                             {tech.full_name?.substring(0, 2).toUpperCase()}
                                         </div>
                                         <div className="text-left">
-                                            <p className={`text-sm font-black ${formData.technician_id === tech.id ? 'text-white' : 'text-gray-300'}`}>{tech.full_name}</p>
-                                            <div className="flex items-center gap-1.5 mt-1">
-                                                <div className={`size-1.5 rounded-full ${isBusy ? 'bg-orange-500' : 'bg-emerald-500'} animate-pulse shadow-[0_0_8px_currentColor]`} />
+                                            <p className={`text-sm font-bold ${formData.technician_id === tech.id ? 'text-white' : 'text-gray-300'}`}>{tech.full_name}</p>
+                                            <div className="flex items-center gap-1.5 mt-0.5">
+                                                <div className={`size-1.5 rounded-full ${isBusy ? 'bg-orange-500' : 'bg-emerald-500'} animate-pulse`} />
                                                 <span className={`text-[9px] font-black uppercase tracking-widest ${isBusy ? 'text-orange-500/80' : 'text-emerald-500/80'}`}>
-                                                    {isBusy ? 'En Servicio' : 'Disponible'}
+                                                    {isBusy ? 'Ocupado' : 'Disponible'}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className={`size-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${formData.technician_id === tech.id
-                                        ? 'border-indigo-500 bg-indigo-500 scale-110 shadow-lg'
+                                    <div className={`size-5 rounded-full border flex items-center justify-center transition-all ${formData.technician_id === tech.id
+                                        ? 'border-indigo-500 bg-indigo-500'
                                         : 'border-gray-800 bg-transparent'
                                         }`}>
                                         {formData.technician_id === tech.id && (
-                                            <CheckCircle2 size={14} className="text-white font-bold" />
+                                            <CheckCircle2 size={12} className="text-white" />
                                         )}
                                     </div>
                                 </motion.div>
                             );
                         }) : (
-                            <p className="text-center py-6 text-[10px] text-gray-500 font-bold uppercase tracking-widest border border-dashed border-white/5 rounded-[2rem]">Cargando personal de campo...</p>
+                            <p className="text-center py-6 text-[10px] text-gray-500 font-bold uppercase tracking-widest border border-dashed border-white/5 rounded-2xl">Buscando técnicos...</p>
                         )}
                     </div>
                 </section>

@@ -72,6 +72,23 @@ function RegisterContent() {
         }
     };
 
+    const handleGoogleLogin = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/auth/callback`,
+                },
+            });
+            if (error) throw error;
+        } catch (err: any) {
+            setError(err.message || 'Error al conectar con Google');
+            setLoading(false);
+        }
+    };
+
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -291,8 +308,8 @@ function RegisterContent() {
                         &copy; 2026 ServiTech Hub • v2.0.4
                     </p>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
 
