@@ -1,0 +1,8 @@
+{
+  "name": "Servihogar ",
+  "description": "Professional Service Management App for Technicians with AI Assistance",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

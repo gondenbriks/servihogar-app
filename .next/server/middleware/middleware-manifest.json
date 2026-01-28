@@ -1,0 +1,55 @@
+{
+  "sorted_middleware": [],
+  "middleware": {
+    "/": {
+      "files": [
+        "server/edge/chunks/node_modules_next_dist_esm_build_templates_edge-wrapper_3b93bb62.js",
+        "server/edge/chunks/[root-of-the-server]__21113e3f._.js",
+        "server/edge/chunks/turbopack-node_modules_next_dist_esm_build_templates_edge-wrapper_9af34d6a.js"
+      ],
+      "name": "middleware",
+      "page": "/",
+      "matchers": [
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/dashboard/:path*{(\\\\.json)}?",
+          "originalSource": "/dashboard/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/service-orders/:path*{(\\\\.json)}?",
+          "originalSource": "/service-orders/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/finance/:path*{(\\\\.json)}?",
+          "originalSource": "/finance/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/clients/:path*{(\\\\.json)}?",
+          "originalSource": "/clients/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/ai-assistant/:path*{(\\\\.json)}?",
+          "originalSource": "/ai-assistant/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/scanner/:path*{(\\\\.json)}?",
+          "originalSource": "/scanner/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/login{(\\\\.json)}?",
+          "originalSource": "/login"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "env": {
+        "__NEXT_BUILD_ID": "vQ8JCZ9-laJV3f8EFrTN6",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "5qa21eOMGZfnbSMldCLj/Kz2hLZn2FRv1qn4efpaNHk=",
+        "__NEXT_PREVIEW_MODE_ID": "a95ef240cf25b0c1e75117827f96e2b7",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "4043a768d7e787ca26aa779c8f2f822c0ff2027e77ac0737519ac095307568be",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "3924f238aebde418256546cf71f671882e2b41a640dd414fbc7b85047f1d5148"
+      }
+    }
+  },
+  "instrumentation": null,
+  "functions": {}
+}

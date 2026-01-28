@@ -1,0 +1,20 @@
+{
+  "node": {
+    "70123382b1b28ff7b6651829fe7748b5e33f11b69a": {
+      "workers": {
+        "app/clients/page": {
+          "moduleId": 882,
+          "async": false,
+          "exportedName": "generatePersonalizedMessage",
+          "filename": "app/actions/personalized-message.ts"
+        }
+      },
+      "layer": {
+        "app/clients/page": "action-browser"
+      },
+      "exportedName": "generatePersonalizedMessage",
+      "filename": "app/actions/personalized-message.ts"
+    }
+  },
+  "edge": {}
+}
