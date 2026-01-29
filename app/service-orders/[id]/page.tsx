@@ -131,22 +131,46 @@ export default function ServiceOrderPage() {
         }
     };
 
-    const handleActivateService = async () => {
+    const handleStatusChange = async (newStatus: string) => {
         if (!serviceId) return;
         setIsSaving(true);
         try {
             const { error } = await supabase
                 .from('service_orders')
-                .update({ status: 'IN_PROGRESS' })
+                .update({ status: newStatus })
                 .eq('id', serviceId);
 
             if (error) throw error;
-            setOrder({ ...order, status: 'IN_PROGRESS' });
+            setOrder({ ...order, status: newStatus });
+
+            // If changing to WAITING_PARTS, trigger WhatsApp alert
+            if (newStatus === 'WAITING_PARTS') {
+                const prompt = `Redacta un mensaje profesional de WhatsApp para el cliente "${order.client?.full_name}" informando que su equipo (${order.equipment?.brand} ${order.equipment?.type}) requiere un repuesto que no tenemos en stock actualmente.
+                - Estado: Esperando Repuesto
+                - Instrucciones: Corto, profesional, menciona que le avisaremos en cuanto llegue el repuesto. Usa emojis 📦, 🔧, ✅.`;
+
+                setIsWaGenerating(true);
+                setShowConfirmModal(true);
+                try {
+                    const result = await model.generateContent(prompt);
+                    const response = await result.response;
+                    setWaMessage(response.text());
+                } catch (e) {
+                    setWaMessage(`Hola ${order.client?.full_name}, le informamos que para proceder con la reparación de su ${order.equipment?.brand} ${order.equipment?.type} necesitamos pedir un repuesto. Le avisaremos en cuanto esté disponible. 📦🔧`);
+                } finally {
+                    setIsWaGenerating(false);
+                }
+            }
         } catch (error) {
-            console.error("Error activating service:", error);
+            console.error("Error updating status:", error);
+            alert("Error al actualizar el estado");
         } finally {
             setIsSaving(false);
         }
+    };
+
+    const handleActivateService = async () => {
+        handleStatusChange('IN_PROGRESS');
     };
 
     const generateWhatsAppMessage = async () => {
@@ -208,6 +232,10 @@ export default function ServiceOrderPage() {
             const totalPartsCost = selectedParts.reduce((acc, part) => acc + (part.unit_price * part.quantity), 0);
             const finalTotal = Number(laborCost) + totalPartsCost;
 
+            // Calculate next maintenance date (6 months from now)
+            const maintenanceDate = new Date();
+            maintenanceDate.setMonth(maintenanceDate.getMonth() + 6);
+
             // 1. Update Service Order
             const { error: orderError } = await supabase
                 .from('service_orders')
@@ -216,7 +244,8 @@ export default function ServiceOrderPage() {
                     labor_cost: Number(laborCost),
                     status: 'COMPLETED',
                     completed_at: new Date().toISOString(),
-                    total_cost: finalTotal
+                    total_cost: finalTotal,
+                    next_maintenance_date: maintenanceDate.toISOString()
                 })
                 .eq('id', serviceId);
 
@@ -438,13 +467,13 @@ export default function ServiceOrderPage() {
                         <div className="flex-1 flex flex-col w-full space-y-10 py-10 overflow-y-auto pb-44">
                             {/* Order Info Summary */}
                             {order && (
-                                <section className="px-6">
+                                <section className="px-6 space-y-4">
                                     <div className="bg-gray-900/60 border border-white/10 rounded-[2.5rem] p-6 flex items-center gap-6 shadow-2xl relative overflow-hidden group">
                                         <div className="absolute right-0 top-0 bottom-0 w-1 bg-[#135bec]/30" />
                                         <div className="size-16 rounded-[1.5rem] bg-[#135bec]/10 border border-[#135bec]/20 flex items-center justify-center text-[#135bec] shadow-inner">
                                             <Wrench size={32} />
                                         </div>
-                                        <div>
+                                        <div className="flex-1">
                                             <div className="flex items-center gap-3">
                                                 <h3 className="font-black text-xl leading-tight text-white">
                                                     {order.equipment?.brand} {order.equipment?.type}
@@ -459,6 +488,30 @@ export default function ServiceOrderPage() {
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* Status Switcher Component */}
+                                    <div className="p-1 px-1.5 bg-black/40 rounded-2xl border border-gray-800 flex gap-2">
+                                        <button
+                                            onClick={() => handleStatusChange('IN_PROGRESS')}
+                                            className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${order.status === 'IN_PROGRESS' ? 'bg-[#135bec] text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                                        >
+                                            En Proceso
+                                        </button>
+                                        <button
+                                            onClick={() => handleStatusChange('WAITING_PARTS')}
+                                            className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${order.status === 'WAITING_PARTS' ? 'bg-amber-500 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                                        >
+                                            En Repuestos
+                                        </button>
+                                    </div>
+
+                                    {order.status === 'WAITING_PARTS' && (
+                                        <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl animate-pulse">
+                                            <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest text-center">
+                                                Alerta de WhatsApp Activada para Repuestos
+                                            </p>
+                                        </div>
+                                    )}
                                 </section>
                             )}
 
