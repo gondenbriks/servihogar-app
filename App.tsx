@@ -21,14 +21,14 @@ import RepairExpertScreen from './screens/RepairExpertScreen';
 import SettingsScreen from './screens/SettingsScreen';
 
 
-import LandingPage from './components/LandingPage';
+import LandingPageScreen from './screens/LandingPageScreen';
 
 
 const App: React.FC = () => {
   return (
     <HashRouter>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<LandingPageScreen />} />
         <Route path="/dashboard" element={<DashboardScreen />} />
         <Route path="/agenda" element={<AgendaScreen />} />
         <Route path="/service-order" element={<ServiceOrderScreen />} />

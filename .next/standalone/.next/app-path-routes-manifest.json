@@ -3,6 +3,7 @@
   "/_not-found/page": "/_not-found",
   "/agenda/page": "/agenda",
   "/ai-assistant/page": "/ai-assistant",
+  "/auth/callback/route": "/auth/callback",
   "/client-profile/[id]/page": "/client-profile/[id]",
   "/clients/page": "/clients",
   "/dashboard/page": "/dashboard",
@@ -20,5 +21,6 @@
   "/scanner/page": "/scanner",
   "/service-orders/[id]/page": "/service-orders/[id]",
   "/settings/page": "/settings",
+  "/team/page": "/team",
   "/users/page": "/users"
 }

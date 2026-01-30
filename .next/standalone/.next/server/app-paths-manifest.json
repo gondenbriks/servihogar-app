@@ -3,6 +3,7 @@
   "/_not-found/page": "app/_not-found/page.js",
   "/agenda/page": "app/agenda/page.js",
   "/ai-assistant/page": "app/ai-assistant/page.js",
+  "/auth/callback/route": "app/auth/callback/route.js",
   "/client-profile/[id]/page": "app/client-profile/[id]/page.js",
   "/clients/page": "app/clients/page.js",
   "/dashboard/page": "app/dashboard/page.js",
@@ -20,5 +21,6 @@
   "/scanner/page": "app/scanner/page.js",
   "/service-orders/[id]/page": "app/service-orders/[id]/page.js",
   "/settings/page": "app/settings/page.js",
+  "/team/page": "app/team/page.js",
   "/users/page": "app/users/page.js"
 }

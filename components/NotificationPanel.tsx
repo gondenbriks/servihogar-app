@@ -45,13 +45,13 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
     const fetchNotifications = async () => {
         setLoading(true);
         try {
-            // 1. Fetch maintenance alerts (simulating business logic)
-            // Logic: Equipment with last service > 6 months
+            // 1. Fetch maintenance alerts
             const { data: serviceOrders, error: orderError } = await supabase
                 .from('service_orders')
                 .select(`
                     id,
                     completed_at,
+                    next_maintenance_date,
                     equipment_id,
                     equipment (
                         id,
@@ -63,14 +63,15 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
                         full_name
                     )
                 `)
-                .eq('status', 'DELIVERED')
+                .or(`status.eq.DELIVERED,status.eq.COMPLETED`)
                 .order('completed_at', { ascending: false });
 
             if (orderError) throw orderError;
 
             const maintenanceAlerts: Notification[] = [];
-            const sixMonthsAgo = new Date();
-            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            const now = new Date();
+            const thirtyDaysFromNow = new Date();
+            thirtyDaysFromNow.setDate(now.getDate() + 30);
 
             // Group by equipment to get the LATEST service for each
             const latestServicesMap = new Map<string, any>();
@@ -83,9 +84,29 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
             });
 
             latestServicesMap.forEach((order) => {
-                const completedDate = new Date(order.completed_at);
-                if (completedDate < sixMonthsAgo) {
-                    // Safe access to nested properties
+                let isAlert = false;
+                let alertDate = new Date();
+
+                if (order.next_maintenance_date) {
+                    const maintenanceDate = new Date(order.next_maintenance_date);
+                    // Alert if date is past OR within next 30 days
+                    if (maintenanceDate <= thirtyDaysFromNow) {
+                        isAlert = true;
+                        alertDate = maintenanceDate;
+                    }
+                } else if (order.completed_at) {
+                    // Fallback for old orders: 6 months after completion
+                    const completedDate = new Date(order.completed_at);
+                    const sixMonthsLater = new Date(completedDate);
+                    sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
+
+                    if (sixMonthsLater <= thirtyDaysFromNow) {
+                        isAlert = true;
+                        alertDate = sixMonthsLater;
+                    }
+                }
+
+                if (isAlert) {
                     const equipmentBrand = order.equipment?.brand || 'Equipo';
                     const clientName = order.clients?.full_name || 'Cliente';
 
@@ -93,8 +114,8 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
                         id: `maint-${order.id}`,
                         type: 'maintenance',
                         title: 'Mantenimiento Preventivo',
-                        description: `El equipo ${equipmentBrand} (${clientName}) requiere revisión tras 6 meses desde el último servicio.`,
-                        date: completedDate,
+                        description: `El equipo ${equipmentBrand} (${clientName}) tiene programado su mantenimiento para el ${alertDate.toLocaleDateString()}.`,
+                        date: alertDate,
                         read: false,
                         data: order
                     });
