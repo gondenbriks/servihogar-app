@@ -1,3 +1,0 @@
-module.exports=[33290,a=>{"use strict";var b=a.i(7997);function c({children:a}){return(0,b.jsxs)("html",{lang:"es",className:"dark",children:[(0,b.jsx)("head",{children:(0,b.jsx)("link",{rel:"stylesheet",href:"https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"})}),(0,b.jsx)("body",{className:"antialiased",children:a})]})}a.s(["default",()=>c])}];
-
-//# sourceMappingURL=app_layout_tsx_271801d7._.js.map
