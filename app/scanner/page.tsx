@@ -13,9 +13,16 @@ import {
     Flashlight,
     RefreshCw,
     Maximize,
-    Box
+    Box,
+    Bot
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+// Initialize Gemini
+const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '');
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 function ScannerContent() {
     const router = useRouter();
@@ -27,12 +34,107 @@ function ScannerContent() {
     const [parts, setParts] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [scannedPart, setScannedPart] = useState<any | null>(null);
+    const [isFlashOn, setIsFlashOn] = useState(false);
+    const [scanner, setScanner] = useState<Html5Qrcode | null>(null);
+    const [isAiLoading, setIsAiLoading] = useState(false);
+    const [aiRepairTips, setAiRepairTips] = useState<string>('');
+    const [showAiModal, setShowAiModal] = useState(false);
 
     useEffect(() => {
         if (searchQuery.length > 2) {
             searchParts();
         }
     }, [searchQuery]);
+
+    useEffect(() => {
+        const html5QrCode = new Html5Qrcode("reader");
+        setScanner(html5QrCode);
+
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+        html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            (decodedText) => {
+                setSearchQuery(decodedText);
+                identifyPartFromQr(decodedText);
+            },
+            (errorMessage) => {
+                // Ignore silent errors
+            }
+        ).catch((err) => {
+            console.error("Error starting scanner:", err);
+        });
+
+        return () => {
+            if (html5QrCode.isScanning) {
+                html5QrCode.stop().catch(err => console.error("Error stopping scanner", err));
+            }
+        };
+    }, []);
+
+    const identifyPartFromQr = async (code: string) => {
+        setIsLoading(true);
+        const { data, error } = await supabase
+            .from('parts')
+            .select('*')
+            .eq('code', code)
+            .single();
+
+        if (data) {
+            setScannedPart(data);
+        } else {
+            // If not found by exact code, search loosely
+            const { data: looseData } = await supabase
+                .from('parts')
+                .select('*')
+                .ilike('code', `%${code}%`)
+                .limit(1);
+            if (looseData && looseData.length > 0) setScannedPart(looseData[0]);
+        }
+        setIsLoading(false);
+    };
+
+    const toggleFlash = async () => {
+        if (!scanner || !scanner.isScanning) return;
+        try {
+            const track = (scanner as any).getRunningTrack();
+            if (track && track.getCapabilities().torch) {
+                const newFlashState = !isFlashOn;
+                await track.applyConstraints({
+                    advanced: [{ torch: newFlashState } as any]
+                });
+                setIsFlashOn(newFlashState);
+            } else {
+                alert("La linterna no está disponible en este dispositivo");
+            }
+        } catch (err) {
+            console.error("Flash error:", err);
+        }
+    };
+
+    const getAiRepairAdvice = async (partName: string) => {
+        setIsAiLoading(true);
+        setAiRepairTips('');
+        setShowAiModal(true);
+
+        const prompt = `Actúa como un experto en servicio técnico de electrodomésticos. El técnico acaba de escanear el repuesto "${partName}". 
+        Proporciona:
+        1. 3 síntomas comunes que indican que esta pieza está fallando.
+        2. Pasos breves para el diagnóstico.
+        3. Una recomendación de reparación profesional (qué herramientas usar o qué cuidar al instalar).
+        Formato: Markdown con emojis, profesional y conciso.`;
+
+        try {
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            setAiRepairTips(response.text());
+        } catch (error) {
+            setAiRepairTips("No se pudo obtener recomendaciones en este momento. Verifique su conexión.");
+        } finally {
+            setIsAiLoading(false);
+        }
+    };
 
     const searchParts = async () => {
         setIsLoading(true);
@@ -70,45 +172,39 @@ function ScannerContent() {
                 </div>
                 <motion.button
                     whileTap={{ scale: 0.9 }}
-                    className="size-11 flex items-center justify-center rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 text-white transition-all shadow-2xl"
+                    onClick={toggleFlash}
+                    className={`size-11 flex items-center justify-center rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 transition-all shadow-2xl ${isFlashOn ? 'text-[#00ff9d] border-[#00ff9d]/30' : 'text-white'}`}
                 >
                     <Flashlight size={20} />
                 </motion.button>
             </div>
 
             {/* Immersive Camera View Area */}
-            <div className="relative h-[60vh] w-full bg-black overflow-hidden group">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2070')] bg-cover bg-center grayscale opacity-60 mix-blend-screen" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0c10] via-transparent to-transparent z-10" />
+            <div className="relative h-[55vh] w-full bg-black overflow-hidden group">
+                <div id="reader" className="absolute inset-0 z-0"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0c10] via-transparent to-transparent z-10 pointer-events-none" />
 
                 <div className="absolute inset-0 z-20 pointer-events-none p-10 flex flex-col items-center justify-center">
-                    <div className="relative w-72 h-72">
+                    <div className="relative w-64 h-64">
                         <div className="absolute -top-1 -left-1 size-10 border-t-2 border-l-2 border-[#00d4ff] rounded-tl-3xl shadow-[0_0_15px_#00d4ff]" />
                         <div className="absolute -top-1 -right-1 size-10 border-t-2 border-r-2 border-[#00d4ff] rounded-tr-3xl shadow-[0_0_15px_#00d4ff]" />
                         <div className="absolute -bottom-1 -left-1 size-10 border-b-2 border-l-2 border-[#00d4ff] rounded-bl-3xl shadow-[0_0_15px_#00d4ff]" />
                         <div className="absolute -bottom-1 -right-1 size-10 border-b-2 border-r-2 border-[#00d4ff] rounded-br-3xl shadow-[0_0_15px_#00d4ff]" />
 
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-                            <div className="size-8 rounded-full border border-white/10 flex items-center justify-center">
-                                <Maximize size={16} className="text-white/20" />
-                            </div>
-                        </div>
-
                         <motion.div
                             animate={{ top: ['0%', '100%', '0%'] }}
-                            transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-                            className="absolute left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#00ff9d] to-transparent shadow-[0_0_20px_#00ff9d] z-30"
+                            transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                            className="absolute left-0 right-0 h-[2px] bg-[#00ff9d] shadow-[0_0_15px_#00ff9d] z-30 opacity-50"
                         />
-
-                        <div className="absolute inset-10 border border-white/5 rounded-[2rem] animate-pulse" />
                     </div>
 
-                    <div className="mt-12 flex flex-col items-center gap-3">
+                    <div className="mt-8 flex flex-col items-center gap-3">
                         <div className="px-5 py-2 rounded-2xl bg-black/60 border border-white/5 backdrop-blur-xl flex items-center gap-3">
-                            <RefreshCw size={14} className="text-gray-500 animate-spin" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Analizando Código...</span>
+                            <RefreshCw size={14} className={`text-gray-500 ${isLoading ? 'animate-spin' : ''}`} />
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                                {isLoading ? 'Procesando...' : 'Detector Activo'}
+                            </span>
                         </div>
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest text-center px-8">Enfoque la etiqueta del repuesto para identificación asistida</p>
                     </div>
                 </div>
             </div>
@@ -219,7 +315,7 @@ function ScannerContent() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 mb-10">
+                            <div className="grid grid-cols-2 gap-4 mb-4">
                                 <div className="bg-gray-900/50 p-6 rounded-[2rem] border border-white/5 shadow-inner">
                                     <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Precio Unitario</p>
                                     <p className="text-2xl font-black text-[#00ff9d] tracking-tight">${scannedPart.unit_price?.toLocaleString()}</p>
@@ -229,6 +325,15 @@ function ScannerContent() {
                                     <p className="text-2xl font-black text-white tracking-tight">{scannedPart.stock_level} <span className="text-[10px] text-gray-600">UND</span></p>
                                 </div>
                             </div>
+
+                            <motion.button
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => getAiRepairAdvice(scannedPart.name)}
+                                className="w-full bg-white/5 hover:bg-white/10 text-white font-black py-4 rounded-2xl border border-white/10 flex items-center justify-center gap-3 mb-6 transition-all"
+                            >
+                                <Bot size={20} className="text-[#00ff9d]" />
+                                <span className="uppercase tracking-widest text-[10px]">Guía de Reparación IA</span>
+                            </motion.button>
 
                             <motion.button
                                 whileTap={{ scale: 0.95 }}
@@ -247,6 +352,63 @@ function ScannerContent() {
                                 <Plus size={24} />
                                 <span className="uppercase tracking-[0.2em] text-sm">Vincular a Servicio</span>
                             </motion.button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* AI Repair Advice Modal */}
+            <AnimatePresence>
+                {showAiModal && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowAiModal(false)}
+                            className="absolute inset-0 bg-black/95 backdrop-blur-2xl"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-[#0f1115] w-full max-w-sm rounded-[3rem] border border-white/10 shadow-2xl overflow-hidden relative z-[210] flex flex-col max-h-[80vh]"
+                        >
+                            <div className="p-6 border-b border-white/5 bg-[#135bec]/5 flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                    <div className="size-10 rounded-xl bg-[#00ff9d]/10 flex items-center justify-center text-[#00ff9d]">
+                                        <Bot size={20} />
+                                    </div>
+                                    <h3 className="text-sm font-black text-white uppercase tracking-widest">Asistente de Falla</h3>
+                                </div>
+                                <button onClick={() => setShowAiModal(false)} className="text-gray-500 hover:text-white">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="p-8 overflow-y-auto custom-scrollbar">
+                                {isAiLoading ? (
+                                    <div className="flex flex-col items-center justify-center py-20 gap-4">
+                                        <div className="size-10 border-4 border-[#00ff9d]/30 border-t-[#00ff9d] rounded-full animate-spin"></div>
+                                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] animate-pulse">Consultando base técnica...</p>
+                                    </div>
+                                ) : (
+                                    <div className="prose prose-invert prose-sm">
+                                        <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
+                                            {aiRepairTips}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="p-6 border-t border-white/5 bg-black/20">
+                                <button
+                                    onClick={() => setShowAiModal(false)}
+                                    className="w-full bg-gray-900 border border-white/10 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest"
+                                >
+                                    Entendido
+                                </button>
+                            </div>
                         </motion.div>
                     </div>
                 )}
