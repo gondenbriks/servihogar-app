@@ -17,7 +17,11 @@ import {
     BrainCircuit,
     Save,
     Activity,
-    AlertTriangle
+    AlertTriangle,
+    Camera,
+    X,
+    Maximize2,
+    Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -50,6 +54,56 @@ export default function AIAssistantPage() {
     const [symptoms, setSymptoms] = useState('');
     const [diagnosisResult, setDiagnosisResult] = useState<DiagnosisResult | null>(null);
     const [isListening, setIsListening] = useState(false);
+    const [capturedImage, setCapturedImage] = useState<string | null>(null);
+    const [isCameraOpen, setIsCameraOpen] = useState(false);
+    const [isFlashOn, setIsFlashOn] = useState(false);
+
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const streamRef = useRef<MediaStream | null>(null);
+
+    useEffect(() => {
+        if (isCameraOpen) {
+            startChatCamera();
+        } else {
+            stopChatCamera();
+        }
+    }, [isCameraOpen]);
+
+    const startChatCamera = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment' }
+            });
+            if (videoRef.current) videoRef.current.srcObject = stream;
+            streamRef.current = stream;
+        } catch (err) {
+            console.error(err);
+            alert("No se pudo acceder a la cámara.");
+            setIsCameraOpen(false);
+        }
+    };
+
+    const stopChatCamera = () => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(t => t.stop());
+            streamRef.current = null;
+        }
+    };
+
+    const capturePhotoForChat = () => {
+        if (!videoRef.current || !canvasRef.current) return;
+        const canvas = canvasRef.current;
+        const video = videoRef.current;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            ctx.drawImage(video, 0, 0);
+            setCapturedImage(canvas.toDataURL('image/jpeg'));
+            setIsCameraOpen(false);
+        }
+    };
 
     const toggleListening = () => {
         if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -107,7 +161,7 @@ export default function AIAssistantPage() {
         }));
 
         try {
-            const responseText = await chatWithGemini(userMessage.text, history);
+            const responseText = await chatWithGemini(userMessage.text, history, capturedImage || undefined);
 
             const botMessage: ChatMessage = {
                 id: (Date.now() + 1).toString(),
@@ -117,6 +171,7 @@ export default function AIAssistantPage() {
             };
 
             setMessages(prev => [...prev, botMessage]);
+            setCapturedImage(null);
         } catch (error: any) {
             console.error(error);
             const errorMessage: ChatMessage = {
@@ -452,14 +507,37 @@ export default function AIAssistantPage() {
             {/* Footer Form (Chat) */}
             {mode === 'chat' && (
                 <div className="bg-[#0a0c10]/95 backdrop-blur-xl border-t border-white/5 p-5 fixed bottom-0 w-full max-w-4xl z-[60] rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)] left-1/2 -translate-x-1/2">
+                    {capturedImage && (
+                        <div className="mb-4 flex items-center gap-3 animate-in slide-in-from-bottom-2">
+                            <div className="relative size-20 rounded-2xl overflow-hidden border-2 border-[#135bec] shadow-lg shadow-[#135bec]/20">
+                                <img src={capturedImage} alt="Captured" className="w-full h-full object-cover" />
+                                <button
+                                    onClick={() => setCapturedImage(null)}
+                                    className="absolute top-1 right-1 size-6 bg-black/60 rounded-full flex items-center justify-center text-white backdrop-blur-md"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-[#135bec] uppercase tracking-widest">Imagen Lista</p>
+                                <p className="text-[9px] text-gray-500 font-bold">ServiBot la analizará al enviar</p>
+                            </div>
+                        </div>
+                    )}
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setIsCameraOpen(true)}
+                            className="size-14 rounded-2xl bg-gray-900 border border-white/5 flex items-center justify-center text-[#135bec] hover:bg-[#135bec]/10 transition-all active:scale-95"
+                        >
+                            <Camera size={24} />
+                        </button>
                         <div className="relative flex-1">
                             <input
                                 type="text"
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                                placeholder="Escribe tu consulta técnica..."
+                                placeholder={capturedImage ? "Describe la falla o el repuesto..." : "Escribe tu consulta técnica..."}
                                 className="w-full bg-gray-900 border border-white/5 text-white rounded-2xl pl-5 pr-12 py-4 focus:outline-none focus:border-[#135bec] transition-all placeholder:text-gray-600 text-sm font-medium"
                                 disabled={isLoading}
                             />
@@ -474,7 +552,7 @@ export default function AIAssistantPage() {
                         </div>
                         <button
                             onClick={() => handleSend()}
-                            disabled={!inputValue.trim() || isLoading}
+                            disabled={isLoading || (!inputValue.trim() && !capturedImage)}
                             className="size-14 rounded-2xl bg-[#135bec] flex items-center justify-center text-white shadow-lg shadow-[#135bec]/20 active:scale-95 transition-all disabled:opacity-50"
                         >
                             <Send size={24} />
@@ -485,6 +563,45 @@ export default function AIAssistantPage() {
                     </p>
                 </div>
             )}
+            {/* Camera Modal Overlay */}
+            <AnimatePresence>
+                {isCameraOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[200] bg-black flex flex-col items-center justify-center p-6"
+                    >
+                        <div className="relative w-full max-w-sm aspect-square bg-gray-900 rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl">
+                            <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                            <canvas ref={canvasRef} className="hidden" />
+
+                            {/* Overlay Scanner UI */}
+                            <div className="absolute inset-0 border-[2px] border-dashed border-[#00ff9d]/30 m-12 rounded-[2rem] pointer-events-none" />
+
+                            <button
+                                onClick={() => setIsCameraOpen(false)}
+                                className="absolute top-6 right-6 size-12 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center text-white"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="mt-10 flex flex-col items-center gap-6">
+                            <motion.button
+                                whileTap={{ scale: 0.9 }}
+                                onClick={capturePhotoForChat}
+                                className="size-24 bg-white rounded-full border-[8px] border-gray-900 shadow-2xl flex items-center justify-center"
+                            >
+                                <div className="size-14 bg-[#135bec] rounded-full flex items-center justify-center text-white">
+                                    <Maximize2 size={24} />
+                                </div>
+                            </motion.button>
+                            <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Centrar objeto para análisis</p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
