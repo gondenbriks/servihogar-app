@@ -60,6 +60,7 @@ export default function ServiceOrderPage() {
     const [availableParts, setAvailableParts] = useState<any[]>([]);
     const [isPartsModalOpen, setIsPartsModalOpen] = useState(false);
     const [partsSearch, setPartsSearch] = useState('');
+    const [isListening, setIsListening] = useState(false);
 
     useEffect(() => {
         if (serviceId) {
@@ -193,6 +194,38 @@ export default function ServiceOrderPage() {
         } finally {
             setIsWaGenerating(false);
         }
+    };
+
+    const startListening = () => {
+        if (!('webkitSpeechRecognition' in window)) {
+            alert('El reconocimiento de voz no es compatible con este navegador.');
+            return;
+        }
+
+        const recognition = new (window as any).webkitSpeechRecognition();
+        recognition.lang = 'es-ES';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onstart = () => {
+            setIsListening(true);
+        };
+
+        recognition.onresult = (event: any) => {
+            const transcript = event.results[0][0].transcript;
+            setDiagnosis(prev => prev ? `${prev} ${transcript}` : transcript);
+        };
+
+        recognition.onerror = (event: any) => {
+            console.error('Speech recognition error:', event.error);
+            setIsListening(false);
+        };
+
+        recognition.onend = () => {
+            setIsListening(false);
+        };
+
+        recognition.start();
     };
 
     const sendWhatsApp = () => {
@@ -530,7 +563,8 @@ export default function ServiceOrderPage() {
                                     ></textarea>
                                     <motion.button
                                         whileTap={{ scale: 0.9 }}
-                                        className="absolute bottom-5 right-5 p-4 bg-gray-900/80 backdrop-blur-md text-[#135bec] hover:text-white hover:bg-[#135bec] rounded-2xl transition-all shadow-xl border border-white/5"
+                                        onClick={startListening}
+                                        className={`absolute bottom-5 right-5 p-4 rounded-2xl transition-all shadow-xl border border-white/5 ${isListening ? 'bg-rose-500 text-white animate-pulse' : 'bg-gray-900/80 backdrop-blur-md text-[#135bec] hover:text-white hover:bg-[#135bec]'}`}
                                     >
                                         <Mic size={24} />
                                     </motion.button>

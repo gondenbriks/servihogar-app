@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, LayoutGrid, Calendar, Navigation, Wallet, Box, Settings, Home, LogOut, User } from 'lucide-react';
+import { X, LayoutGrid, Calendar, Navigation, Wallet, Box, Settings, Home, LogOut, User, Upload } from 'lucide-react';
 
 interface AppMenuProps {
     isOpen: boolean;
@@ -20,6 +20,7 @@ const AppMenu: React.FC<AppMenuProps> = ({ isOpen, onClose }) => {
         { id: 'logistics', icon: <Navigation size={24} />, label: 'Logística', path: '/logistics' },
         { id: 'finance', icon: <Wallet size={24} />, label: 'Finanzas', path: '/finance' },
         { id: 'inventory', icon: <Box size={24} />, label: 'Inventario', path: '/inventory' },
+        { id: 'import', icon: <Upload size={24} />, label: 'Carga Masiva', path: '/import-center' },
         { id: 'settings', icon: <Settings size={24} />, label: 'Configuración', path: '/settings' },
     ];
 

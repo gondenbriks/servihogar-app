@@ -71,8 +71,12 @@ export default function InvoicePreviewPage() {
 
     const handleShareWhatsApp = () => {
         if (!order) return;
-        const message = `Hola ${order.client?.full_name}, adjunto la factura de su servicio técnico ${order.order_number} por un valor de $${Number(order.total_cost).toLocaleString()}. Gracias por confiar en ServiTech Pro.`;
-        window.open(`https://wa.me/${order.client?.phone}?text=${encodeURIComponent(message)}`, '_blank');
+        const message = `Hola ${order.client?.full_name}, adjunto la factura de su servicio técnico ${order.order_number} por un valor de $${Number(order.total_cost).toLocaleString()}. Puede verla aquí: ${window.location.href}`;
+        window.open(`https://wa.me/${order.client?.phone?.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
+    };
+
+    const handlePrint = () => {
+        window.print();
     };
 
     if (isLoading) return (
@@ -92,13 +96,16 @@ export default function InvoicePreviewPage() {
     return (
         <div className="min-h-screen bg-[#0a0c10] text-white flex flex-col font-sans max-w-md mx-auto relative pb-40">
             {/* Header */}
-            <header className="p-4 flex items-center justify-between border-b border-gray-800 bg-[#0a0c10]/90 backdrop-blur-md sticky top-0 z-50">
+            <header className="p-4 flex items-center justify-between border-b border-gray-800 bg-[#0a0c10]/90 backdrop-blur-md sticky top-0 z-50 print:hidden">
                 <button onClick={() => router.back()} className="p-2 hover:bg-gray-800 rounded-full transition-colors">
                     <ChevronLeft size={24} />
                 </button>
                 <h1 className="text-lg font-black uppercase tracking-tight text-[#00d4ff]">Factura Digital</h1>
-                <button className="p-2 hover:bg-gray-800 rounded-full transition-colors">
-                    <Share2 size={20} className="text-gray-400" />
+                <button
+                    onClick={handleShareWhatsApp}
+                    className="p-2 hover:bg-gray-800 rounded-full transition-colors"
+                >
+                    <Share2 size={20} className="text-[#1ab05c]" />
                 </button>
             </header>
 
@@ -251,7 +258,7 @@ export default function InvoicePreviewPage() {
             </main>
 
             {/* Sticky Actions */}
-            <footer className="bg-[#12141a]/95 backdrop-blur-3xl border-t border-white/5 p-5 fixed bottom-0 w-full max-w-md z-50 rounded-t-[2.5rem] shadow-[0_-20px_40px_rgba(0,0,0,0.5)]">
+            <footer className="bg-[#12141a]/95 backdrop-blur-3xl border-t border-white/5 p-5 fixed bottom-0 w-full max-w-md z-50 rounded-t-[2.5rem] shadow-[0_-20px_40px_rgba(0,0,0,0.5)] print:hidden">
                 <button
                     onClick={handleShareWhatsApp}
                     className="w-full bg-[#1ab05c] hover:bg-[#159a4f] text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 mb-4 shadow-lg shadow-[#1ab05c]/20 transition-all active:scale-[0.97]"
@@ -260,12 +267,18 @@ export default function InvoicePreviewPage() {
                     <span className="uppercase tracking-widest text-sm">Enviar por WhatsApp</span>
                 </button>
                 <div className="grid grid-cols-2 gap-4">
-                    <button className="py-3.5 bg-gray-900 border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors">
-                        <Download size={14} className="text-gray-400" />
+                    <button
+                        onClick={handlePrint}
+                        className="py-3.5 bg-gray-900 border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors"
+                    >
+                        <Download size={14} className="text-[#135bec]" />
                         PDF
                     </button>
-                    <button className="py-3.5 bg-gray-900 border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors">
-                        <Printer size={14} className="text-gray-400" />
+                    <button
+                        onClick={handlePrint}
+                        className="py-3.5 bg-gray-900 border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors"
+                    >
+                        <Printer size={14} className="text-[#00ff9d]" />
                         Imprimir
                     </button>
                 </div>

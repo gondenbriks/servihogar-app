@@ -206,6 +206,29 @@ function NewServiceContent() {
         setClientSearch('');
     };
 
+    const downloadTemplate = () => {
+        const templateData = [
+            {
+                Cedula: '12345678',
+                Nombre: 'Cliente Ejemplo',
+                Telefono: '3001234567',
+                Direccion: 'Calle 10 # 5-20, Cali',
+                Tipo: 'Nevera',
+                Marca: 'Samsung',
+                Serial: 'SN-SAMS-9988',
+                Falla: 'No enfría',
+                Fecha: new Date().toISOString().split('T')[0],
+                Hora: '10:00',
+                Prioridad: 'NORMAL',
+                'Tipo Servicio': 'REPAIR'
+            }
+        ];
+        const ws = XLSX.utils.json_to_sheet(templateData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Plantilla Ordenes');
+        XLSX.writeFile(wb, 'Plantilla_Ordenes_ServiHogar.xlsx');
+    };
+
     const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -396,6 +419,30 @@ function NewServiceContent() {
                 </div>
 
                 <div className="flex items-center gap-2">
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImportExcel}
+                        className="hidden"
+                        accept=".xlsx, .xls, .csv"
+                    />
+                    <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={downloadTemplate}
+                        className="flex size-10 items-center justify-center rounded-xl bg-gray-900/50 text-emerald-500 hover:bg-emerald-500/10 transition-colors border border-white/5"
+                        title="Descargar Plantilla"
+                    >
+                        <FileText size={16} />
+                    </motion.button>
+                    <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isImporting}
+                        className="flex size-10 items-center justify-center rounded-xl bg-gray-900/50 text-[#135bec] hover:bg-[#135bec]/10 transition-colors border border-white/5"
+                        title="Subir Archivo"
+                    >
+                        {isImporting ? <div className="size-4 border-2 border-[#135bec] border-t-transparent rounded-full animate-spin" /> : <Upload size={16} />}
+                    </motion.button>
                     <motion.button
                         whileTap={{ scale: 0.9 }}
                         onClick={resetForm}

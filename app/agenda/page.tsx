@@ -14,11 +14,14 @@ import {
     Clock,
     MapPin,
     Plus,
-    Download
+    Download,
+    Upload,
+    FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProHeader from '../../components/ProHeader';
 import { exportToExcel } from '../../lib/export-utils';
+import * as XLSX from 'xlsx';
 
 type FilterType = 'all' | 'pending' | 'active' | 'completed' | 'new';
 
@@ -34,6 +37,8 @@ export default function AgendaPage() {
     const [services, setServices] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [techniciansList, setTechniciansList] = useState<any[]>([]);
+    const [isImporting, setIsImporting] = useState(false);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         loadServices();
@@ -61,6 +66,72 @@ export default function AgendaPage() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const downloadTemplate = () => {
+        const templateData = [
+            {
+                Cedula: '12345678',
+                Nombre: 'Cliente Ejemplo',
+                Telefono: '3001234567',
+                Direccion: 'Calle 10 # 5-20, Cali'
+            }
+        ];
+        const ws = XLSX.utils.json_to_sheet(templateData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Plantilla Clientes');
+        XLSX.writeFile(wb, 'Plantilla_Clientes_ServiTech.xlsx');
+    };
+
+    const handleImportClients = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsImporting(true);
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            try {
+                const bstr = evt.target?.result;
+                const wb = XLSX.read(bstr, { type: 'binary' });
+                const wsname = wb.SheetNames[0];
+                const ws = wb.Sheets[wsname];
+                const data: any[] = XLSX.utils.sheet_to_json(ws);
+
+                if (data.length === 0) {
+                    alert('El archivo está vacío');
+                    return;
+                }
+
+                const clientsToInsert = data.map(row => ({
+                    national_id: String(row.Cedula || row.Identificacion || row.ID || row.Id || ''),
+                    full_name: String(row.Nombre || row['Nombre Completo'] || row.Name || ''),
+                    phone: String(row.Telefono || row.Celular || row.Phone || ''),
+                    address: String(row.Direccion || row.Address || ''),
+                    category: 'REGULAR'
+                })).filter(c => c.national_id && c.full_name);
+
+                if (clientsToInsert.length === 0) {
+                    alert('No se encontraron clientes válidos. Verifica las columnas (Cedula, Nombre, Telefono).');
+                    return;
+                }
+
+                const { error } = await supabase
+                    .from('clients')
+                    .upsert(clientsToInsert, { onConflict: 'national_id' });
+
+                if (error) throw error;
+
+                alert(`¡Éxito! Se han importado/actualizado ${clientsToInsert.length} clientes.`);
+                loadServices();
+            } catch (error: any) {
+                console.error('Error importando:', error);
+                alert('Error al procesar el archivo: ' + error.message);
+            } finally {
+                setIsImporting(false);
+                if (fileInputRef.current) fileInputRef.current.value = '';
+            }
+        };
+        reader.readAsBinaryString(file);
     };
 
     const handleExportExcel = () => {
@@ -158,7 +229,36 @@ export default function AgendaPage() {
 
     return (
         <div className="bg-[#0a0c10] min-h-screen text-white font-sans max-w-5xl mx-auto relative overflow-x-hidden border-x border-white/5 pb-24">
-            <ProHeader title="Agenda" showBack />
+            <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImportClients}
+                className="hidden"
+                accept=".xlsx, .xls, .csv"
+            />
+            <ProHeader
+                title="Agenda"
+                showBack
+                rightElement={
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={downloadTemplate}
+                            className="size-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 hover:bg-emerald-500/20 transition-all active:scale-95"
+                            title="Descargar Plantilla"
+                        >
+                            <FileText size={20} />
+                        </button>
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isImporting}
+                            className="size-11 rounded-2xl bg-[#135bec]/10 border border-[#135bec]/20 flex items-center justify-center text-[#135bec] hover:bg-[#135bec]/20 transition-all active:scale-95"
+                            title="Importar Clientes"
+                        >
+                            {isImporting ? <div className="size-4 border-2 border-[#135bec] border-t-transparent rounded-full animate-spin" /> : <Upload size={20} />}
+                        </button>
+                    </div>
+                }
+            />
 
             <div className="pt-8 pb-4 px-6 border-b border-white/5 bg-[#0a0c10]">
                 <div className="space-y-6 relative z-10">
@@ -252,6 +352,13 @@ export default function AgendaPage() {
                     >
                         <Download size={16} />
                         Exportar
+                    </button>
+                    <button
+                        onClick={() => router.push('/import-center')}
+                        className="p-2 bg-[#135bec]/10 border border-[#135bec]/20 rounded-xl text-[#135bec] hover:bg-[#135bec]/20 transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
+                    >
+                        <Upload size={16} />
+                        Importar
                     </button>
                 </div>
 
