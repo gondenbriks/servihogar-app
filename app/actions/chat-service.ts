@@ -3,7 +3,12 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@supabase/supabase-js";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
+if (!GEMINI_API_KEY) {
+    console.error("CRITICAL ERROR: GEMINI_API_KEY is not defined in environment variables.");
+}
+
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 // Initialize Supabase admin client for server-side operations
 const supabaseAdmin = createClient(

@@ -117,12 +117,12 @@ export default function AIAssistantPage() {
             };
 
             setMessages(prev => [...prev, botMessage]);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
             const errorMessage: ChatMessage = {
                 id: (Date.now() + 1).toString(),
                 role: 'model',
-                text: 'Lo siento, ocurrió un error al procesar tu solicitud.',
+                text: '⚠️ **Falla de conexión**: No he podido conectar con el servidor de IA.\n\nPor favor, verifica que tu conexión a internet sea estable y que las claves de API (GEMINI_API_KEY) estén configuradas correctamente en el panel de control.',
                 timestamp: new Date()
             };
             setMessages(prev => [...prev, errorMessage]);

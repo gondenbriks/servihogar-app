@@ -20,9 +20,11 @@ import {
     User,
     ChevronLeft,
     FileText,
-    Upload
+    Upload,
+    Download
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { exportToExcel } from '../../lib/export-utils';
 
 type FilterType = 'all' | 'expired' | 'upcoming' | 'ok';
 
@@ -182,6 +184,25 @@ export default function ClientsPage() {
         } else {
             setSelectedClients(new Set(filteredClients.map(c => c.id)));
         }
+    };
+
+    const handleExportExcel = () => {
+        if (filteredClients.length === 0) {
+            alert('No hay datos para exportar');
+            return;
+        }
+
+        const dataToExport = filteredClients.map(c => ({
+            'Nombre': c.name,
+            'Identificación': c.nationalId,
+            'Teléfono': c.phone,
+            'Dirección': c.address,
+            'Categoría': c.category,
+            'Último Servicio': c.lastServiceDate ? new Date(c.lastServiceDate).toLocaleDateString() : 'Ninguno',
+            'Equipo': c.lastAppliance || 'N/A'
+        }));
+
+        exportToExcel(dataToExport, `Clientes_ServiHogar_${new Date().toISOString().split('T')[0]}`);
     };
 
     const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -366,6 +387,13 @@ export default function ClientsPage() {
                                     ) : (
                                         <FileText size={20} />
                                     )}
+                                </button>
+                                <button
+                                    onClick={handleExportExcel}
+                                    className="p-3 bg-gray-900 border border-white/5 rounded-2xl text-[#135bec] hover:bg-gray-800 transition-all active:scale-95"
+                                    title="Exportar a Excel"
+                                >
+                                    <Download size={20} />
                                 </button>
                                 <button onClick={() => setShowAddModal(true)} className="p-3 bg-gray-900 border border-white/5 rounded-2xl text-[#135bec] hover:bg-gray-800 transition-all active:scale-95">
                                     <UserPlus size={20} />

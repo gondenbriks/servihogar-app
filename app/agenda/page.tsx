@@ -13,10 +13,12 @@ import {
     Wrench,
     Clock,
     MapPin,
-    Plus
+    Plus,
+    Download
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProHeader from '../../components/ProHeader';
+import { exportToExcel } from '../../lib/export-utils';
 
 type FilterType = 'all' | 'pending' | 'active' | 'completed' | 'new';
 
@@ -59,6 +61,26 @@ export default function AgendaPage() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleExportExcel = () => {
+        if (filteredServices.length === 0) {
+            alert('No hay datos para exportar');
+            return;
+        }
+
+        const dataToExport = filteredServices.map(s => ({
+            'Orden #': s.order_number,
+            'Cliente': s.clients?.full_name,
+            'Dirección': s.clients?.address,
+            'Técnico': s.technicians?.full_name,
+            'Estado': getStatusInfo(s.status).label,
+            'Falla Reportada': s.reported_issue,
+            'Fecha Programada': s.scheduled_at ? new Date(s.scheduled_at).toLocaleDateString() : 'Pendiente',
+            'Hora': s.scheduled_at ? new Date(s.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A'
+        }));
+
+        exportToExcel(dataToExport, `Agenda_${selectedDate}_ServiHogar`);
     };
 
     const generateDates = () => {
@@ -223,6 +245,14 @@ export default function AgendaPage() {
                             ))}
                         </select>
                     </div>
+
+                    <button
+                        onClick={handleExportExcel}
+                        className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-500 hover:bg-emerald-500/20 transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
+                    >
+                        <Download size={16} />
+                        Exportar
+                    </button>
                 </div>
 
                 {isLoading ? (

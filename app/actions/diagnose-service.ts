@@ -2,8 +2,12 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// El SDK @google/generative-ai está configurado con la API Key del entorno
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
+if (!GEMINI_API_KEY) {
+    console.error("CRITICAL ERROR: GEMINI_API_KEY is not defined in environment variables for diagnosis.");
+}
+
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 export interface DiagnosisResult {
     diagnosis: string;
