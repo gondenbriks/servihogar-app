@@ -133,7 +133,7 @@ export default function InvoicePreviewPage() {
                         <div className="text-right flex flex-col items-end">
                             <div className="flex items-center gap-2 text-[#135bec] mb-1">
                                 <Wrench size={20} />
-                                <span className="font-black text-lg italic tracking-tighter">ServiTech</span>
+                                <span className="font-black text-lg italic tracking-tighter">ServiHogar</span>
                             </div>
                             <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-tight text-right">
                                 NIT: 900.123.456-7<br />
@@ -219,6 +219,8 @@ export default function InvoicePreviewPage() {
                             <p className="text-[8px] text-gray-500 leading-relaxed text-center italic">
                                 Garantía de 90 días sobre mano de obra y partes instaladas.
                                 {order.warranty_expiration && ` Vence: ${new Date(order.warranty_expiration).toLocaleDateString()}`}
+                                <br />
+                                <b>Importante:</b> ServiHogar no se hace responsable por pérdida de artefactos personales o daños preexistentes en la propiedad del cliente.
                             </p>
                         </div>
                     </div>
