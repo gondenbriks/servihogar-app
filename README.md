@@ -18,3 +18,19 @@ View your app in AI Studio: https://ai.studio/apps/drive/14rzLkUbrCWMLW76UW83x4A
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+## Deployment to Vercel
+
+Before deploying, ensure you run the verification script:
+
+`npm run verify`
+
+**Checklist:**
+
+1.  **Environment Variables**: Ensure the following variables are set in Vercel Project Settings:
+    *   `NEXT_PUBLIC_SUPABASE_URL`
+    *   `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+    *   `GEMINI_API_KEY` (if used in server actions)
+2.  **Build Command**: `next build` (default)
+3.  **Install Command**: `npm install` (default)
+4.  **Framework**: Next.js
