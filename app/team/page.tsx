@@ -25,6 +25,9 @@ import { createBrowserClient } from '@supabase/ssr';
 import ProHeader from '../../components/ProHeader';
 import InviteMemberModal from '../../components/InviteMemberModal';
 
+// Force dynamic rendering to avoid build-time errors with Supabase client
+export const dynamic = 'force-dynamic';
+
 export default function TeamPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
