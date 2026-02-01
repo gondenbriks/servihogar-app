@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProHeader from '../../components/ProHeader';
+import Background from '../../components/design/Background';
+import NeonButton from '../../components/design/NeonButton';
 
 export default function InventoryPage() {
     const router = useRouter();
@@ -144,7 +146,8 @@ export default function InventoryPage() {
     };
 
     return (
-        <div className="bg-[#0a0c10] min-h-screen text-white font-sans max-w-5xl mx-auto relative overflow-x-hidden border-x border-white/5 pb-24">
+        <div className="bg-background min-h-screen text-white font-outfit max-w-5xl mx-auto relative overflow-x-hidden border-x border-white/5 pb-24">
+            <Background />
             <ProHeader
                 title="Stock Pro"
                 showBack
@@ -173,16 +176,16 @@ export default function InventoryPage() {
 
                 <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
                     {categories.map((cat: any) => (
-                        <button
+                        <NeonButton
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
-                            className={`shrink-0 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${activeCategory === cat
-                                ? 'bg-white text-black border-white shadow-lg'
-                                : 'bg-gray-900/50 text-gray-500 border-white/5'
+                            className={`shrink-0 !px-5 !py-2.5 !rounded-xl !text-[10px] !tracking-wider transition-all !border ${activeCategory === cat
+                                ? '!bg-white !text-black shadow-lg'
+                                : '!bg-gray-900/50 !text-gray-500 !border-white/5'
                                 }`}
                         >
                             {cat}
-                        </button>
+                        </NeonButton>
                     ))}
                 </div>
             </div>

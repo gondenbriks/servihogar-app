@@ -1,0 +1,11 @@
+﻿
+ name                               value               environments        created    
+ GCP_SERVICE_ACCOUNT_EMAIL          Encrypted           Production          2h ago     
+ GCP_WORKLOAD_IDENTITY_PROVIDER     Encrypted           Production          2h ago     
+ GCP_WORKLOAD_IDENTITY_POOL         Encrypted           Production          2h ago     
+ GCP_PROJECT_ID                     Encrypted           Production          2h ago     
+ NEXT_PUBLIC_SUPABASE_ANON_KEY      Encrypted           Production          4d ago     
+ NEXT_PUBLIC_SUPABASE_URL           Encrypted           Production          4d ago     
+ NEXT_PUBLIC_GEMINI_API_KEY         Encrypted           Production          4d ago     
+ GEMINI_API_KEY                     Encrypted           Production          4d ago     
+

@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRef } from 'react';
+import Background from '../../components/design/Background';
+import NeonButton from '../../components/design/NeonButton';
 
 function ScannerContent() {
     const router = useRouter();
@@ -129,7 +131,8 @@ function ScannerContent() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0a0c10] text-white flex flex-col font-sans max-w-md mx-auto relative overflow-hidden">
+        <div className="min-h-screen bg-background text-white flex flex-col font-outfit max-w-md mx-auto relative overflow-hidden">
+            <Background />
             {/* Immersive Scanner Header - Overlay */}
             <div className="absolute top-0 left-0 right-0 z-50 p-6 flex items-center justify-between">
                 <motion.button
@@ -317,8 +320,7 @@ function ScannerContent() {
                                 </div>
                             </div>
 
-                            <motion.button
-                                whileTap={{ scale: 0.95 }}
+                            <NeonButton
                                 onClick={() => {
                                     if (context === 'service_order' && serviceId) {
                                         localStorage.setItem('scanned_part_data', JSON.stringify({
@@ -329,11 +331,11 @@ function ScannerContent() {
                                     setScannedPart(null);
                                     router.back();
                                 }}
-                                className="w-full bg-[#135bec] hover:bg-blue-600 text-white font-black py-5 rounded-[1.8rem] shadow-[0_20px_40px_rgba(19,91,236,0.3)] flex items-center justify-center gap-4 transition-all"
+                                className="w-full justify-center !text-[#135bec] !border-[#135bec] hover:!bg-[#135bec] hover:!text-white"
                             >
                                 <Plus size={24} />
-                                <span className="uppercase tracking-[0.2em] text-sm">Vincular a Servicio</span>
-                            </motion.button>
+                                <span className="uppercase tracking-[0.2em] text-sm font-bold ml-2">Vincular a Servicio</span>
+                            </NeonButton>
                         </motion.div>
                     </div>
                 )}

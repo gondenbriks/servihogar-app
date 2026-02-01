@@ -20,7 +20,7 @@ const ProHeader: React.FC<ProHeaderProps> = ({ title, showBack = false, rightEle
 
     return (
         <>
-            <header className="sticky top-0 z-[100] bg-[#0a0c10]/80 backdrop-blur-2xl border-b border-white/5 px-6 py-4 flex items-center justify-between">
+            <header className="sticky top-0 z-[100] bg-background/80 backdrop-blur-2xl border-b border-white/5 px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     {showBack ? (
                         <motion.button

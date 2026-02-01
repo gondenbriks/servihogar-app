@@ -26,6 +26,26 @@ export default function InviteMemberModal({ isOpen, onClose, teamId }: InviteMem
         e.preventDefault();
         setLoading(true);
 
+        // Check current member count
+        const { count, error: countError } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('team_id', teamId);
+
+        if (countError) {
+            console.error('Error checking team limit:', countError);
+            setLoading(false);
+            return;
+        }
+
+        // Enforce Standard Plan limit (3 members)
+        const PLAN_LIMIT = 3;
+        if (count !== null && count >= PLAN_LIMIT) {
+            alert(`Has alcanzado el límite de ${PLAN_LIMIT} miembros de tu Plan Estándar. Actualiza tu plan para agregar más miembros.`);
+            setLoading(false);
+            return;
+        }
+
         const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiration

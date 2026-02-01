@@ -31,6 +31,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProHeader from '../../components/ProHeader';
+import Background from '../../components/design/Background';
+import NeonButton from '../../components/design/NeonButton';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -137,23 +139,24 @@ export default function DashboardPage() {
     };
 
     const QuickAction = ({ icon: Icon, label, color, onClick }: any) => (
-        <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-4 group cursor-pointer pointer-events-auto"
+        <NeonButton
             onClick={onClick}
+            className={`!p-0 !rounded-2xl border border-white/10 ${color} !bg-transparent active:scale-95 transition-all group-hover:scale-105 flex items-center gap-4`}
         >
-            <span className="bg-gray-900 border border-white/10 px-4 py-2 rounded-2xl text-[10px] font-black text-white shadow-2xl opacity-100 uppercase tracking-widest min-w-[120px] text-right">
-                {label}
-            </span>
-            <div className={`size-14 rounded-2xl shadow-2xl flex items-center justify-center border border-white/10 ${color} active:scale-90 transition-all group-hover:scale-110`}>
-                <Icon size={24} className="text-white" />
+            <div className={`w-full h-full flex items-center gap-4 p-1 pr-4`}>
+                <div className={`size-14 rounded-2xl flex items-center justify-center ${color}`}>
+                    <Icon size={24} className="text-white" />
+                </div>
+                <span className="text-[10px] font-black text-white uppercase tracking-widest min-w-[120px] text-right">
+                    {label}
+                </span>
             </div>
-        </motion.div>
+        </NeonButton>
     );
 
     return (
-        <div className="min-h-screen bg-[#0a0c10] text-white font-sans relative overflow-x-hidden">
+        <div className="min-h-screen bg-background text-white font-outfit relative overflow-x-hidden">
+            <Background />
             <ProHeader
                 title="ServiTech Pro"
                 rightElement={

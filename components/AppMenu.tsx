@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, LayoutGrid, Calendar, Navigation, Wallet, Box, Settings, Home, LogOut, User, Upload } from 'lucide-react';
+import { X, LayoutGrid, Calendar, Navigation, Wallet, Box, Settings, Home, LogOut, User, Upload, CalendarDays } from 'lucide-react';
 
 interface AppMenuProps {
     isOpen: boolean;
@@ -17,6 +17,7 @@ const AppMenu: React.FC<AppMenuProps> = ({ isOpen, onClose }) => {
     const navItems = [
         { id: 'dashboard', icon: <LayoutGrid size={24} />, label: 'Panel', path: '/dashboard' },
         { id: 'agenda', icon: <Calendar size={24} />, label: 'Agenda', path: '/agenda' },
+        { id: 'calendar', icon: <CalendarDays size={24} />, label: 'Calendario', path: '/calendar' },
         { id: 'logistics', icon: <Navigation size={24} />, label: 'Logística', path: '/logistics' },
         { id: 'finance', icon: <Wallet size={24} />, label: 'Finanzas', path: '/finance' },
         { id: 'inventory', icon: <Box size={24} />, label: 'Inventario', path: '/inventory' },
@@ -49,9 +50,9 @@ const AppMenu: React.FC<AppMenuProps> = ({ isOpen, onClose }) => {
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed top-0 right-0 h-full w-[300px] bg-[#0a0c10] border-l border-white/5 z-[210] shadow-2xl flex flex-col"
+                        className="fixed top-0 right-0 h-full w-[300px] bg-background border-l border-white/5 z-[210] shadow-2xl flex flex-col"
                     >
-                        <div className="p-8 flex justify-between items-center border-b border-white/5 bg-gray-900/20">
+                        <div className="p-8 flex justify-between items-center border-b border-white/5 bg-background/20">
                             <h2 className="text-xl font-black italic tracking-tighter uppercase">Menu <span className="text-[#135bec]">Pro</span></h2>
                             <button
                                 onClick={onClose}

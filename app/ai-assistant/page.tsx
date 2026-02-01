@@ -21,13 +21,89 @@ import {
     Camera,
     X,
     Maximize2,
-    Zap
+    Zap,
+    LayoutTemplate,
+    Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Background from '../../components/design/Background';
+import NeonButton from '../../components/design/NeonButton';
+
+interface Template {
+    id: string;
+    title: string;
+    content: string;
+    isSystem?: boolean;
+}
+
+const PREDEFINED_TEMPLATES: Template[] = [
+    {
+        id: 'sys-wash',
+        title: 'Lavadora: Diagnóstico General',
+        content: 'Revisando Lavadora [MARCA] [MODELO]. Síntoma: [NO DRENA / NO CENTRIFUGA]. Necesito causas probables y pasos para Test Mode.',
+        isSystem: true
+    },
+    {
+        id: 'sys-fridge',
+        title: 'Nevera: No Enfría',
+        content: 'Nevera [MARCA] No-Frost no enfría en conservación. Revisar sistema de deshielo y sensores.',
+        isSystem: true
+    },
+    {
+        id: 'sys-dryer',
+        title: 'Secadora: No Calienta',
+        content: 'Secadora [MARCA]. Gira pero no calienta. Revisar termostatos e ignitor.',
+        isSystem: true
+    }
+];
 
 export default function AIAssistantPage() {
     const router = useRouter();
     const [mode, setMode] = useState<'chat' | 'diagnose'>('chat');
+
+    // Template State
+    const [templates, setTemplates] = useState<Template[]>([]);
+    const [showTemplateModal, setShowTemplateModal] = useState(false);
+    const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+    const [newTemplateTitle, setNewTemplateTitle] = useState('');
+
+    useEffect(() => {
+        const saved = localStorage.getItem('servitech_templates');
+        if (saved) {
+            try {
+                setTemplates(JSON.parse(saved));
+            } catch (e) {
+                console.error("Error loading templates", e);
+            }
+        }
+    }, []);
+
+    const handleSaveTemplate = () => {
+        if (!newTemplateTitle || !symptoms) return;
+        const newTemp: Template = {
+            id: Date.now().toString(),
+            title: newTemplateTitle,
+            content: symptoms
+        };
+        const updated = [newTemp, ...templates];
+        setTemplates(updated);
+        localStorage.setItem('servitech_templates', JSON.stringify(updated));
+        setIsSavingTemplate(false);
+        setNewTemplateTitle('');
+    };
+
+    const handleApplyTemplate = (content: string) => {
+        setSymptoms(content);
+        setShowTemplateModal(false);
+    };
+
+    const handleDeleteTemplate = (id: string) => {
+        if (confirm('¿Eliminar esta plantilla?')) {
+            const updated = templates.filter(t => t.id !== id);
+            setTemplates(updated);
+            localStorage.setItem('servitech_templates', JSON.stringify(updated));
+        }
+    };
     const [messages, setMessages] = useState<ChatMessage[]>([
         {
             id: 'welcome',
@@ -206,9 +282,10 @@ export default function AIAssistantPage() {
     };
 
     return (
-        <div className="bg-[#0a0c10] min-h-screen text-white max-w-4xl mx-auto flex flex-col font-sans relative">
+        <div className="bg-background min-h-screen text-white max-w-4xl mx-auto flex flex-col font-outfit relative overflow-hidden">
+            <Background />
             {/* Header */}
-            <header className="sticky top-0 z-50 flex items-center justify-between bg-[#0a0c10]/95 backdrop-blur-md p-4 border-b border-gray-800 shadow-lg">
+            <header className="sticky top-0 z-50 flex items-center justify-between bg-background/80 backdrop-blur-md p-4 border-b border-gray-800 shadow-lg">
                 <div className="flex items-center gap-3">
                     <button onClick={() => router.back()} className="p-2 hover:bg-gray-800 rounded-full transition-colors">
                         <ChevronLeft size={24} />
@@ -227,20 +304,31 @@ export default function AIAssistantPage() {
                     </div>
                 </div>
 
-                {/* Mode Toggle */}
-                <div className="flex bg-gray-900/50 p-1 rounded-2xl border border-white/5">
-                    <button
-                        onClick={() => { setMode('chat'); setDiagnosisResult(null); }}
-                        className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'chat' ? 'bg-[#135bec] text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
-                    >
-                        Chat
-                    </button>
-                    <button
-                        onClick={() => setMode('diagnose')}
-                        className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'diagnose' ? 'bg-[#135bec] text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
-                    >
-                        IA-Expert
-                    </button>
+                {/* Mode & Template Toggle */}
+                <div className="flex items-center gap-2">
+                    {mode === 'diagnose' && (
+                        <button
+                            onClick={() => setShowTemplateModal(true)}
+                            className="p-2 bg-gray-900/50 border border-white/5 rounded-xl text-gray-400 hover:text-blue-400 transition-colors"
+                            title="Plantillas"
+                        >
+                            <LayoutTemplate size={18} />
+                        </button>
+                    )}
+                    <div className="flex bg-gray-900/50 p-1 rounded-2xl border border-white/5">
+                        <button
+                            onClick={() => { setMode('chat'); setDiagnosisResult(null); }}
+                            className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'chat' ? 'bg-[#135bec] text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
+                        >
+                            Chat
+                        </button>
+                        <button
+                            onClick={() => setMode('diagnose')}
+                            className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'diagnose' ? 'bg-[#135bec] text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
+                        >
+                            IA-Expert
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -352,7 +440,17 @@ export default function AIAssistantPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Síntomas Reportados</label>
+                                    <div className="flex justify-between items-center px-1">
+                                        <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Síntomas Reportados</label>
+                                        {symptoms.trim() && (
+                                            <button
+                                                onClick={() => setIsSavingTemplate(true)}
+                                                className="text-[10px] text-[#135bec] font-bold uppercase hover:underline"
+                                            >
+                                                Guardar Plantilla
+                                            </button>
+                                        )}
+                                    </div>
                                     <textarea
                                         rows={4}
                                         placeholder="No enciende, error OE, ruido fuerte en centrifugado..."
@@ -362,20 +460,19 @@ export default function AIAssistantPage() {
                                     />
                                 </div>
 
-                                <button
+                                <NeonButton
                                     onClick={handleDiagnose}
-                                    disabled={isPending || !applianceData.brand || !symptoms}
-                                    className="w-full py-4 bg-[#135bec] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-[#135bec]/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                                    className="w-full justify-center"
                                 >
                                     {isPending ? (
                                         <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                                     ) : (
                                         <>
                                             <Sparkles size={18} />
-                                            Analizar con Gemini
+                                            <span className="ml-2">Analizar con Gemini</span>
                                         </>
                                     )}
-                                </button>
+                                </NeonButton>
                             </div>
                         ) : (
                             <div className="space-y-6 pb-20 animate-in slide-in-from-bottom duration-500">
@@ -563,6 +660,124 @@ export default function AIAssistantPage() {
                     </p>
                 </div>
             )}
+            {/* Template Modal Overlay */}
+            <AnimatePresence>
+                {showTemplateModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex items-center justify-center p-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="bg-[#0f1115] border border-white/10 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+                        >
+                            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                                <h3 className="text-xl font-black flex items-center gap-2">
+                                    <LayoutTemplate className="text-[#135bec]" size={20} />
+                                    PLANTILLAS
+                                </h3>
+                                <button onClick={() => setShowTemplateModal(false)} className="text-gray-500 hover:text-white">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="p-6 overflow-y-auto space-y-4">
+                                <div className="space-y-2">
+                                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Sitema</p>
+                                    <div className="grid gap-2">
+                                        {PREDEFINED_TEMPLATES.map(t => (
+                                            <button
+                                                key={t.id}
+                                                onClick={() => handleApplyTemplate(t.content)}
+                                                className="text-left p-4 bg-white/5 border border-white/5 rounded-2xl hover:border-[#135bec]/30 transition-all group"
+                                            >
+                                                <p className="text-xs font-black text-white group-hover:text-[#135bec]">{t.title}</p>
+                                                <p className="text-[10px] text-gray-500 mt-1 line-clamp-1">{t.content}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {templates.length > 0 && (
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Mis Plantillas</p>
+                                        <div className="grid gap-2">
+                                            {templates.map(t => (
+                                                <div key={t.id} className="relative group">
+                                                    <button
+                                                        onClick={() => handleApplyTemplate(t.content)}
+                                                        className="w-full text-left p-4 bg-white/5 border border-white/5 rounded-2xl hover:border-[#135bec]/30 transition-all"
+                                                    >
+                                                        <p className="text-xs font-black text-white group-hover:text-[#135bec]">{t.title}</p>
+                                                        <p className="text-[10px] text-gray-500 mt-1 line-clamp-1">{t.content}</p>
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleDeleteTemplate(t.id); }}
+                                                        className="absolute top-4 right-4 p-1 rounded-lg bg-rose-500/10 text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Save Template Modal */}
+            <AnimatePresence>
+                {isSavingTemplate && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[210] bg-black/90 backdrop-blur-md flex items-center justify-center p-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            className="bg-[#0f1115] border border-white/10 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl"
+                        >
+                            <h3 className="text-xl font-black mb-6">Guardar Plantilla</h3>
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Título</label>
+                                    <input
+                                        type="text"
+                                        value={newTemplateTitle}
+                                        onChange={e => setNewTemplateTitle(e.target.value)}
+                                        placeholder="Ej: Lavadora LG no centr..."
+                                        className="w-full bg-black/40 border border-gray-800 rounded-2xl px-4 py-3 text-sm focus:border-[#135bec] outline-none transition-all"
+                                    />
+                                </div>
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        onClick={() => setIsSavingTemplate(false)}
+                                        className="flex-1 py-4 bg-gray-900 text-gray-400 rounded-2xl font-black text-[10px] uppercase tracking-widest"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        onClick={handleSaveTemplate}
+                                        disabled={!newTemplateTitle}
+                                        className="flex-1 py-4 bg-[#135bec] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest disabled:opacity-50"
+                                    >
+                                        Guardar
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Camera Modal Overlay */}
             <AnimatePresence>
                 {isCameraOpen && (

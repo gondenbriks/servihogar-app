@@ -110,7 +110,9 @@ export default function BusinessProfilePage() {
                     tax_id: profile.tax_id,
                     address: profile.address,
                     phone: profile.phone,
-                    email: profile.email
+                    email: profile.email,
+                    invoice_terms: profile.invoice_terms,
+                    invoice_footer: profile.invoice_footer
                 })
                 .eq('id', profile.id);
 
@@ -230,8 +232,17 @@ export default function BusinessProfilePage() {
             <main className="mt-16 px-6 space-y-8">
                 <div className="flex justify-between items-center bg-white/[0.02] border border-white/5 p-5 rounded-3xl">
                     <div>
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">ID FISCAL</p>
-                        <p className="text-xs text-gray-400 font-mono mt-1">{profile.tax_id || 'N/A'}</p>
+                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">ID FISCAL (NIT)</p>
+                        {isEditing ? (
+                            <input
+                                value={profile.tax_id || ''}
+                                onChange={(e) => setProfile({ ...profile, tax_id: e.target.value })}
+                                className="bg-white/5 border border-white/10 rounded-xl p-2 text-xs text-white mt-1 font-mono w-40"
+                                placeholder="Ej: 12345678-9"
+                            />
+                        ) : (
+                            <p className="text-xs text-gray-400 font-mono mt-1">{profile.tax_id || 'N/A'}</p>
+                        )}
                     </div>
                     <motion.button
                         whileTap={{ scale: 0.95 }}
@@ -244,11 +255,22 @@ export default function BusinessProfilePage() {
 
                 <div className="grid grid-cols-3 gap-4">
                     {[
-                        { label: 'Técnicos', val: stats.employees, icon: <Users size={20} />, color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
+                        {
+                            label: 'Técnicos',
+                            val: stats.employees,
+                            icon: <Users size={20} />,
+                            color: 'text-cyan-400',
+                            bg: 'bg-cyan-400/10',
+                            onClick: () => router.push('/team')
+                        },
                         { label: 'Servicios', val: stats.services, icon: <Wrench size={20} />, color: 'text-orange-400', bg: 'bg-orange-400/10' },
                         { label: 'Ingresos', val: `$${stats.earnings}`, icon: <TrendingUp size={20} />, color: 'text-emerald-400', bg: 'bg-emerald-400/10' }
                     ].map((stat, i) => (
-                        <div key={i} className="bg-white/[0.02] p-5 rounded-[2rem] border border-white/5 flex flex-col items-center justify-center">
+                        <div
+                            key={i}
+                            onClick={stat.onClick}
+                            className={`bg-white/[0.02] p-5 rounded-[2rem] border border-white/5 flex flex-col items-center justify-center ${stat.onClick ? 'cursor-pointer hover:bg-white/[0.04] transition-all active:scale-95' : ''}`}
+                        >
                             <div className={`size-10 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center mb-2`}>
                                 {stat.icon}
                             </div>
@@ -284,6 +306,38 @@ export default function BusinessProfilePage() {
                                 </div>
                             </div>
                         ))}
+                    </div>
+                </section>
+
+                <section className="space-y-4">
+                    <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] px-2">Configuración de Factura</h3>
+                    <div className="bg-white/[0.02] rounded-[2.5rem] p-6 border border-white/5 space-y-6">
+                        <div>
+                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-2">Términos y Condiciones (Política)</p>
+                            {isEditing ? (
+                                <textarea
+                                    value={profile.invoice_terms || ''}
+                                    onChange={(e) => setProfile({ ...profile, invoice_terms: e.target.value })}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white min-h-[100px]"
+                                    placeholder="Ej: El servicio tiene una garantía de X días..."
+                                />
+                            ) : (
+                                <p className="text-xs text-gray-300 font-medium leading-relaxed whitespace-pre-line">{profile.invoice_terms || 'No configurado'}</p>
+                            )}
+                        </div>
+                        <div>
+                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-2">Pie de Página (Notas/Garantía)</p>
+                            {isEditing ? (
+                                <textarea
+                                    value={profile.invoice_footer || ''}
+                                    onChange={(e) => setProfile({ ...profile, invoice_footer: e.target.value })}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white min-h-[80px]"
+                                    placeholder="Ej: No nos hacemos responsables por..."
+                                />
+                            ) : (
+                                <p className="text-xs text-gray-300 font-medium leading-relaxed whitespace-pre-line">{profile.invoice_footer || 'No configurado'}</p>
+                            )}
+                        </div>
                     </div>
                 </section>
             </main>

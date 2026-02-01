@@ -18,6 +18,8 @@ import {
     Zap
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import Background from '../../components/design/Background';
+import NeonButton from '../../components/design/NeonButton';
 
 interface ImportRow {
     id: string;
@@ -188,8 +190,9 @@ export default function ImportCenterPage() {
     };
 
     return (
-        <div className="bg-[#0a0c10] min-h-screen text-white font-sans max-w-2xl mx-auto pb-32">
-            <header className="sticky top-0 z-50 bg-[#0a0c10]/80 backdrop-blur-xl p-6 border-b border-white/5 flex items-center justify-between">
+        <div className="bg-background min-h-screen text-white font-outfit max-w-2xl mx-auto pb-32">
+            <Background />
+            <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl p-6 border-b border-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <button onClick={() => router.back()} className="size-10 bg-gray-900 rounded-xl flex items-center justify-center border border-white/5">
                         <ChevronLeft size={20} />

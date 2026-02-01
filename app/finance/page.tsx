@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProHeader from '../../components/ProHeader';
+import Background from '../../components/design/Background';
+import NeonButton from '../../components/design/NeonButton';
 
 type FilterType = 'day' | 'week' | 'month' | 'custom';
 
@@ -102,7 +104,8 @@ export default function FinancePage() {
     };
 
     return (
-        <div className="bg-[#0a0c10] min-h-screen text-white font-sans max-w-5xl mx-auto relative overflow-x-hidden">
+        <div className="bg-background min-h-screen text-white font-outfit max-w-5xl mx-auto relative overflow-x-hidden">
+            <Background />
             <ProHeader
                 title="Finanzas"
                 showBack
@@ -120,13 +123,13 @@ export default function FinancePage() {
             <main className="p-6 pb-12">
                 <div className="flex p-1.5 bg-gray-900/50 border border-white/5 rounded-[2rem] mb-6 shadow-inner relative overflow-hidden">
                     {(['day', 'week', 'month'] as const).map((tab) => (
-                        <button
+                        <NeonButton
                             key={tab}
                             onClick={() => handleTabChange(tab)}
-                            className={`flex-1 py-3.5 text-[10px] font-black uppercase tracking-widest transition-all rounded-[1.5rem] relative z-10 ${activeTab === tab ? 'bg-white text-black shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
+                            className={`flex-1 !rounded-[1.5rem] !text-[10px] !tracking-widest !py-2 transition-all ${activeTab === tab ? '!bg-white !text-black shadow-lg' : '!bg-transparent !text-gray-500 hover:!text-gray-300 !border-transparent'}`}
                         >
                             {tab === 'day' ? 'Hoy' : tab === 'week' ? 'Semana' : 'Mes'}
-                        </button>
+                        </NeonButton>
                     ))}
                 </div>
 

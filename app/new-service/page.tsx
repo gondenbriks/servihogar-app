@@ -29,12 +29,14 @@ import {
     CheckCircle2,
     StickyNote,
     Mic,
-    UserCheck
+    UserCheck,
+    AlertCircle
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { motion, AnimatePresence } from 'framer-motion';
-
 import { Suspense } from 'react';
+import Background from '../../components/design/Background';
+import NeonButton from '../../components/design/NeonButton';
 
 function NewServiceContent() {
     const router = useRouter();
@@ -70,6 +72,8 @@ function NewServiceContent() {
     const [isUploading, setIsUploading] = useState(false);
     const [userRole, setUserRole] = useState<'admin' | 'technician'>('admin');
     const [isListening, setIsListening] = useState(false);
+    const [conflictEvent, setConflictEvent] = useState<any | null>(null);
+    const [isCheckingConflict, setIsCheckingConflict] = useState(false);
 
     const recognitionRef = React.useRef<any>(null);
 
@@ -156,6 +160,41 @@ function NewServiceContent() {
             fetchClientById(initialClientId);
         }
     }, [initialClientId]);
+
+    useEffect(() => {
+        if (formData.date && formData.time) {
+            const timer = setTimeout(checkConflicts, 800);
+            return () => clearTimeout(timer);
+        }
+    }, [formData.date, formData.time]);
+
+    const checkConflicts = async () => {
+        setConflictEvent(null);
+        setIsCheckingConflict(true);
+        try {
+            const start = new Date(`${formData.date}T${formData.time}:00`);
+            const end = new Date(start.getTime() + 60 * 60 * 1000);
+
+            const response = await fetch('/api/google-service', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'list_calendar_events',
+                    timeMin: start.toISOString(),
+                    timeMax: end.toISOString()
+                })
+            });
+
+            const data = await response.json();
+            if (data.success && data.events && data.events.length > 0) {
+                setConflictEvent(data.events[0]);
+            }
+        } catch (err) {
+            console.error("Error checking calendar conflict:", err);
+        } finally {
+            setIsCheckingConflict(false);
+        }
+    };
 
     const fetchTechnicians = async () => {
         const { data } = await supabase.from('technicians').select('*').order('full_name');
@@ -330,6 +369,11 @@ function NewServiceContent() {
             return;
         }
 
+        if (conflictEvent) {
+            const confirmSave = confirm(`¡ATENCIÓN! Ya tienes un evento en Google Calendar ("${conflictEvent.summary}") en este horario. ¿Deseas agendar este servicio de todos modos?`);
+            if (!confirmSave) return;
+        }
+
         setIsSaving(true);
         try {
             let clientId = selectedClient?.id;
@@ -389,6 +433,29 @@ function NewServiceContent() {
 
             if (oErr) throw oErr;
 
+            // 4. Crear Evento en Google Calendar
+            try {
+                const startDateTime = new Date(scheduledAt);
+                const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
+
+                await fetch('/api/google-service', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'create_calendar_event',
+                        calendarEvent: {
+                            summary: `🔧 ${formData.full_name} - ${selectedApplianceType || 'Servicio'}`,
+                            location: formData.address,
+                            description: `Orden: ${newOrder.order_number}\nFalla: ${formData.reported_issue}\nWhatsApp: ${formData.phone}`,
+                            start: startDateTime.toISOString(),
+                            end: endDateTime.toISOString()
+                        }
+                    })
+                });
+            } catch (calErr) {
+                console.error("Error creating calendar event:", calErr);
+            }
+
             router.push('/agenda');
 
         } catch (error: any) {
@@ -399,9 +466,10 @@ function NewServiceContent() {
     };
 
     return (
-        <div className="bg-[#0a0c10] min-h-screen text-white font-sans max-w-4xl mx-auto relative overflow-x-hidden">
+        <div className="bg-background min-h-screen text-white font-outfit max-w-4xl mx-auto relative overflow-hidden">
+            <Background />
             {/* Header */}
-            <header className="sticky top-0 z-50 flex items-center justify-between bg-[#0a0c10]/90 backdrop-blur-2xl p-4 border-b border-white/5">
+            <header className="sticky top-0 z-50 flex items-center justify-between bg-background/90 backdrop-blur-2xl p-4 border-b border-white/5">
                 <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={() => router.back()}
@@ -666,6 +734,35 @@ function NewServiceContent() {
                             </div>
                         </div>
                     </div>
+
+                    <AnimatePresence>
+                        {conflictEvent && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mt-4 p-4 rounded-2xl bg-orange-500/10 border border-orange-500/30 flex items-start gap-3 overflow-hidden"
+                            >
+                                <AlertCircle size={18} className="text-orange-500 shrink-0 mt-0.5" />
+                                <div className="flex-1">
+                                    <p className="text-[10px] font-black uppercase text-orange-500 tracking-widest mb-1">Conflicto de Horario Detectado</p>
+                                    <p className="text-[11px] text-white/80 font-medium">
+                                        Ya tienes una cita: <span className="font-bold text-white italic">"{conflictEvent.summary}"</span> en este horario.
+                                    </p>
+                                </div>
+                            </motion.div>
+                        )}
+                        {isCheckingConflict && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="mt-2 px-4 flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-[#135bec]/60 italic"
+                            >
+                                <RefreshCcw size={10} className="animate-spin" />
+                                Validando disponibilidad en Google...
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </section>
 
                 {/* Equipment Selection */}
@@ -841,20 +938,19 @@ function NewServiceContent() {
 
             {/* Footer Action */}
             <footer className="fixed bottom-0 left-0 right-0 max-w-4xl mx-auto p-6 bg-[#0a0c10]/95 backdrop-blur-3xl border-t border-white/5 z-[70]">
-                <button
+                <NeonButton
                     onClick={handleCreateService}
-                    disabled={isSaving}
-                    className="w-full h-16 bg-[#135bec] text-white rounded-[2rem] font-black text-sm flex items-center justify-center gap-3 shadow-[0_15px_30px_rgba(19,91,236,0.3)] active:scale-95 transition-all disabled:opacity-50"
+                    className="w-full justify-center !text-[#135bec] !border-[#135bec] hover:!bg-[#135bec] hover:!text-white"
                 >
                     {isSaving ? (
                         <div className="size-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
                     ) : (
                         <>
                             <Calendar size={22} />
-                            <span className="uppercase tracking-[0.2em]">Agendar Servicio</span>
+                            <span className="uppercase tracking-[0.2em] font-bold ml-2">Agendar Servicio</span>
                         </>
                     )}
-                </button>
+                </NeonButton>
             </footer>
         </div>
     );

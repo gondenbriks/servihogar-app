@@ -24,6 +24,8 @@ import {
 import { createBrowserClient } from '@supabase/ssr';
 import ProHeader from '../../components/ProHeader';
 import InviteMemberModal from '../../components/InviteMemberModal';
+import Background from '../../components/design/Background';
+import NeonButton from '../../components/design/NeonButton';
 
 // Force dynamic rendering to avoid build-time errors with Supabase client
 export const dynamic = 'force-dynamic';
@@ -129,7 +131,8 @@ export default function TeamPage() {
     }
 
     return (
-        <div className="bg-[#050608] min-h-screen text-white font-sans max-w-5xl mx-auto relative overflow-x-hidden flex flex-col border-x border-white/5">
+        <div className="bg-background min-h-screen text-white font-outfit max-w-5xl mx-auto relative overflow-x-hidden flex flex-col border-x border-white/5">
+            <Background />
             <ProHeader
                 title="Gestión de Equipo"
                 showBack

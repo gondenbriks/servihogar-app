@@ -14,8 +14,11 @@ import {
     MapPin,
     Smartphone,
     Calendar,
-    ArrowRight
+    ArrowRight,
+    Loader2
 } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export default function InvoicePreviewPage() {
     const router = useRouter();
@@ -24,7 +27,11 @@ export default function InvoicePreviewPage() {
 
     const [order, setOrder] = useState<any>(null);
     const [items, setItems] = useState<any[]>([]);
+    const [profile, setProfile] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+    const invoiceRef = React.useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (serviceId) {
@@ -35,6 +42,13 @@ export default function InvoicePreviewPage() {
     const fetchOrderDetails = async () => {
         setIsLoading(true);
         try {
+            // Fetch Business Profile
+            const { data: profileData } = await supabase
+                .from('business_profiles')
+                .select('*')
+                .single();
+            setProfile(profileData);
+
             // Fetch Order with Client and Equipment
             const { data: orderData, error: orderError } = await supabase
                 .from('service_orders')
@@ -69,14 +83,130 @@ export default function InvoicePreviewPage() {
         }
     };
 
-    const handleShareWhatsApp = () => {
+    const handleShareWhatsApp = async () => {
         if (!order) return;
-        const message = `*FACTURA DIGITAL - ServiHogar*\n\nHola ${order.client?.full_name}, adjunto el enlace para ver y descargar su factura oficial de servicio técnico.\n\n📄 *Orden:* #${order.order_number}\n💰 *Total:* $${Number(order.total_cost).toLocaleString()}\n\nVer factura aquí: ${window.location.href}`;
+
+        // Option 1: Try Mobile Sharing (Native)
+        if (navigator.share && navigator.canShare) {
+            setIsGeneratingPDF(true);
+            try {
+                const element = invoiceRef.current;
+                if (!element) return;
+
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff'
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                const blob = pdf.output('blob');
+                const file = new File([blob], `Factura_${order.order_number}.pdf`, { type: 'application/pdf' });
+
+                if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: `Factura ${order.order_number}`,
+                        text: `Hola ${order.client?.full_name}, adjunto la factura de su servicio técnico.`
+                    });
+                    return;
+                }
+            } catch (err) {
+                console.error("Error sharing PDF:", err);
+            } finally {
+                setIsGeneratingPDF(false);
+            }
+        }
+
+        // Fallback: Text message with link
+        const message = `*FACTURA DIGITAL - ${profile?.name || 'ServiHogar'}*\n\nHola ${order.client?.full_name}, adjunto el enlace para ver y descargar su factura oficial de servicio técnico.\n\n📄 *Orden:* #${order.order_number}\n💰 *Total:* $${Number(order.total_cost).toLocaleString()}\n\nVer factura aquí: ${window.location.href}`;
         window.open(`https://wa.me/${order.client?.phone?.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
+    };
+
+    const handleDownloadPDF = async () => {
+        if (!order || !invoiceRef.current) return;
+        setIsGeneratingPDF(true);
+
+        try {
+            const element = invoiceRef.current;
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff'
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`Factura_${order.order_number}.pdf`);
+        } catch (error) {
+            console.error("Error generating PDF:", error);
+            alert("Error al generar el PDF");
+        } finally {
+            setIsGeneratingPDF(false);
+        }
     };
 
     const handlePrint = () => {
         window.print();
+    };
+
+    const handleSaveToDrive = async () => {
+        if (!order) return;
+        setIsSaving(true);
+        try {
+            const invoiceSummary = `
+FACTURA DIGITAL - ${profile?.name || 'ServiHogar'}
+Orden: #${order.order_number}
+Fecha: ${new Date(order.created_at).toLocaleDateString()}
+Cliente: ${order.client?.full_name}
+Teléfono: ${order.client?.phone}
+Dirección: ${order.client?.address}
+Equipo: ${order.equipment?.brand} ${order.equipment?.type}
+
+DETALLE:
+- Mano de Obra: $${Number(order.labor_cost).toLocaleString()}
+${items.map(item => `- ${item.part?.name} (x${item.quantity}): $${(Number(item.price_at_time) * item.quantity).toLocaleString()}`).join('\n')}
+
+TOTAL: $${Number(order.total_cost).toLocaleString()}
+Garantía hasta: ${order.warranty_expiration ? new Date(order.warranty_expiration).toLocaleDateString() : 'N/A'}
+            `.trim();
+
+            const response = await fetch('/api/google-service', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'upload_to_drive',
+                    fileName: `Factura_${order.order_number}.txt`,
+                    content: invoiceSummary,
+                    mimeType: 'text/plain'
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert(`Factura guardada en Google Drive (ID: ${result.fileId})`);
+            } else {
+                throw new Error(result.error || 'Error desconocido');
+            }
+        } catch (error: any) {
+            console.error('Error saving to Drive:', error);
+            alert('Error al guardar en Google Drive: ' + error.message);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     if (isLoading) return (
@@ -111,6 +241,13 @@ export default function InvoicePreviewPage() {
                 </button>
                 <h1 className="text-lg font-black uppercase tracking-tight text-[#00d4ff]">Factura Digital</h1>
                 <button
+                    onClick={handleDownloadPDF}
+                    className="p-2 hover:bg-gray-800 rounded-full transition-colors"
+                    title="Descargar PDF"
+                >
+                    <Download size={20} className="text-[#135bec]" />
+                </button>
+                <button
                     onClick={handleShareWhatsApp}
                     className="p-2 hover:bg-gray-800 rounded-full transition-colors"
                 >
@@ -119,7 +256,19 @@ export default function InvoicePreviewPage() {
             </header>
 
             <main className="flex-1 p-4 lg:p-6 overflow-y-auto print:p-0">
-                <div className="bg-white text-[#1a202c] rounded-[2rem] shadow-2xl overflow-hidden relative p-8 min-h-[600px] flex flex-col print:shadow-none print:border print:border-gray-200 print:min-h-0 print-compact">
+                <div
+                    ref={invoiceRef}
+                    className="bg-white text-[#1a202c] rounded-[2rem] shadow-2xl overflow-hidden relative p-8 min-h-[600px] flex flex-col print:shadow-none print:border print:border-gray-200 print:min-h-0 print-compact"
+                >
+                    {/* Paid Stamp */}
+                    {order.status === 'COMPLETED' && (
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-12 border-[12px] border-[#1ab05c]/10 text-[#1ab05c]/10 px-12 py-4 font-black text-7xl rounded-3xl pointer-events-none uppercase tracking-[0.2em] border-dashed">
+                            PAGADO
+                        </div>
+                    )}
+
+                    {/* Branding Watermark */}
+                    <div className="absolute -bottom-20 -right-20 size-80 bg-gray-50/50 rounded-full blur-3xl pointer-events-none" />
                     {/* Invoice Header */}
                     <div className="flex justify-between items-start mb-6">
                         <div>
@@ -133,11 +282,11 @@ export default function InvoicePreviewPage() {
                         <div className="text-right flex flex-col items-end">
                             <div className="flex items-center gap-2 text-[#135bec] mb-1">
                                 <Wrench size={20} />
-                                <span className="font-black text-lg italic tracking-tighter">ServiHogar</span>
+                                <span className="font-black text-lg italic tracking-tighter">{profile?.name || 'ServiHogar'}</span>
                             </div>
                             <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-tight text-right">
-                                NIT: 900.123.456-7<br />
-                                Cali, Colombia
+                                NIT: {profile?.tax_id || '900.123.456-7'}<br />
+                                {profile?.address || 'Cali, Colombia'}
                             </p>
                         </div>
                     </div>
@@ -172,9 +321,9 @@ export default function InvoicePreviewPage() {
                     <div className="flex-1 mb-6">
                         <table className="w-full text-left">
                             <thead>
-                                <tr className="text-[9px] font-black text-white bg-[#0f172a] uppercase tracking-widest print:bg-gray-100 print:text-black">
-                                    <th className="p-3 rounded-l-xl">Descripción</th>
-                                    <th className="p-3 text-right rounded-r-xl w-24">Importe</th>
+                                <tr className="text-[10px] font-black text-white bg-[#0f172a] uppercase tracking-widest print:bg-gray-100 print:text-black">
+                                    <th className="p-4 rounded-l-2xl">Descripción</th>
+                                    <th className="p-4 text-right rounded-r-2xl w-32">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -216,11 +365,13 @@ export default function InvoicePreviewPage() {
 
                         {/* Legal */}
                         <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-100 print:bg-white print:border-none">
-                            <p className="text-[8px] text-gray-500 leading-relaxed text-center italic">
-                                Garantía de 90 días sobre mano de obra y partes instaladas.
-                                {order.warranty_expiration && ` Vence: ${new Date(order.warranty_expiration).toLocaleDateString()}`}
+                            {profile?.invoice_terms && (
+                                <p className="text-[9px] text-gray-600 font-bold mb-2 uppercase tracking-wide border-b border-gray-200 pb-1">Términos y Condiciones</p>
+                            )}
+                            <p className="text-[8px] text-gray-500 leading-relaxed text-center italic whitespace-pre-line">
+                                {profile?.invoice_terms}
                                 <br />
-                                <b>Importante:</b> ServiHogar no se hace responsable por pérdida de artefactos personales o daños preexistentes en la propiedad del cliente.
+                                {profile?.invoice_footer || `Garantía de 90 días sobre mano de obra y partes instaladas. Vence: ${order.warranty_expiration ? new Date(order.warranty_expiration).toLocaleDateString() : 'N/A'}`}
                             </p>
                         </div>
                     </div>
@@ -238,11 +389,16 @@ export default function InvoicePreviewPage() {
                 </button>
                 <div className="grid grid-cols-2 gap-4">
                     <button
-                        onClick={handlePrint}
-                        className="py-3.5 bg-gray-900 border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors"
+                        onClick={handleDownloadPDF}
+                        disabled={isGeneratingPDF}
+                        className="py-3.5 bg-gray-900 border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors disabled:opacity-50"
                     >
-                        <Download size={14} className="text-[#135bec]" />
-                        PDF
+                        {isGeneratingPDF ? (
+                            <Loader2 size={14} className="animate-spin text-[#135bec]" />
+                        ) : (
+                            <Download size={14} className="text-[#135bec]" />
+                        )}
+                        {isGeneratingPDF ? 'Procesando' : 'PDF'}
                     </button>
                     <button
                         onClick={handlePrint}

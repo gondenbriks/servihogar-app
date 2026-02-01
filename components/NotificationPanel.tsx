@@ -185,7 +185,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed right-0 top-0 h-full w-full max-w-md bg-[#0a0c10] border-l border-white/5 z-[120] shadow-2xl flex flex-col"
+                        className="fixed right-0 top-0 h-full w-full max-w-md bg-background border-l border-white/5 z-[120] shadow-2xl flex flex-col"
                     >
                         {/* Header */}
                         <div className="p-6 border-b border-white/5 flex items-center justify-between">

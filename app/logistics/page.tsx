@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProHeader from '../../components/ProHeader';
+import Background from '../../components/design/Background';
+import NeonButton from '../../components/design/NeonButton';
 
 export default function LogisticsPage() {
     const router = useRouter();
@@ -71,7 +73,8 @@ export default function LogisticsPage() {
     };
 
     return (
-        <div className="bg-[#050608] min-h-screen text-white font-sans max-w-5xl mx-auto relative overflow-x-hidden flex flex-col">
+        <div className="bg-background min-h-screen text-white font-outfit max-w-5xl mx-auto relative overflow-hidden flex flex-col">
+            <Background />
             <ProHeader
                 title="Logística"
                 showBack
@@ -88,7 +91,7 @@ export default function LogisticsPage() {
                 }
             />
 
-            <div className="p-6 bg-[#050608] border-b border-white/5 space-y-6">
+            <div className="p-6 bg-background/50 border-b border-white/5 space-y-6">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -119,7 +122,7 @@ export default function LogisticsPage() {
             </div>
 
             {/* Tactical Map Simulation */}
-            <main className={`relative bg-[#050608] overflow-hidden transition-all duration-700 ${isMapExpanded ? 'flex-1 min-h-[60vh]' : 'h-[400px]'}`}>
+            <main className={`relative bg-background overflow-hidden transition-all duration-700 ${isMapExpanded ? 'flex-1 min-h-[60vh]' : 'h-[400px]'}`}>
                 {/* Tactical Grid */}
                 <div className="absolute inset-0 opacity-10 pointer-events-none"
                     style={{
@@ -268,22 +271,20 @@ export default function LogisticsPage() {
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <motion.button
-                                whileTap={{ scale: 0.95 }}
+                            <NeonButton
                                 onClick={() => openInGoogleMaps(selectedOrder.client?.latitude, selectedOrder.client?.longitude)}
-                                className="h-16 bg-[#00ff9d] text-black rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2"
+                                className="w-full justify-center !text-[#00ff9d] !border-[#00ff9d] hover:!bg-[#00ff9d] hover:!text-black"
                             >
                                 <Navigation size={18} />
-                                Guía GPS
-                            </motion.button>
-                            <motion.button
-                                whileTap={{ scale: 0.95 }}
+                                <span className="ml-2">Guía GPS</span>
+                            </NeonButton>
+                            <NeonButton
                                 onClick={() => router.push(`/service-orders/${selectedOrder.id}`)}
-                                className="h-16 bg-[#135bec] text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2"
+                                className="w-full justify-center !text-[#135bec] !border-[#135bec] hover:!bg-[#135bec] hover:!text-white"
                             >
                                 <ExternalLink size={18} />
-                                Abrir Orden
-                            </motion.button>
+                                <span className="ml-2">Abrir Orden</span>
+                            </NeonButton>
                         </div>
                     </motion.div>
                 )}

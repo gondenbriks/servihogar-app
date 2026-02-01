@@ -29,7 +29,7 @@ const BottomNav: React.FC = () => {
     <>
       {/* Mobile Bottom Bar - Fixed at bottom */}
       <nav className="fixed bottom-0 w-full z-[100] md:hidden">
-        <div className="bg-[#0a0c10]/95 backdrop-blur-3xl border-t border-white/10 pb-6 pt-2 px-4 flex justify-around items-center">
+        <div className="bg-background/95 backdrop-blur-3xl border-t border-white/10 pb-6 pt-2 px-4 flex justify-around items-center">
           {navItems.slice(0, 4).map((item) => {
             const active = isActive(item.path);
             return (
@@ -60,7 +60,7 @@ const BottomNav: React.FC = () => {
 
       {/* Desktop Side/Floating Nav */}
       <nav className="hidden md:flex fixed top-1/2 -translate-y-1/2 left-6 z-[100] flex-col gap-4">
-        <div className="bg-[#0a0c10]/80 backdrop-blur-3xl border border-white/10 p-3 rounded-[2.5rem] shadow-2xl flex flex-col gap-2">
+        <div className="bg-background/80 backdrop-blur-3xl border border-white/10 p-3 rounded-[2.5rem] shadow-2xl flex flex-col gap-2">
           {navItems.map((item) => {
             const active = isActive(item.path);
             return (
@@ -89,7 +89,7 @@ const BottomNav: React.FC = () => {
             initial={{ opacity: 0, x: '100%' }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
-            className="fixed inset-0 z-[110] bg-[#0a0c10] md:max-w-md md:left-auto"
+            className="fixed inset-0 z-[110] bg-background md:max-w-md md:left-auto"
           >
             <div className="p-8 h-full flex flex-col">
               <div className="flex justify-between items-center mb-12">

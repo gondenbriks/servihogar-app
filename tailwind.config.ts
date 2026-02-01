@@ -16,6 +16,13 @@ const config: Config = {
                 "accent-green": "var(--accent-green)",
                 surface: "var(--surface)",
                 border: "var(--border)",
+                neon: {
+                    blue: '#00f3ff',
+                    cyan: '#00e5ff',
+                    green: '#39ff14',
+                    purple: '#bc13fe',
+                    dark: '#050505',
+                }
             },
             fontFamily: {
                 outfit: ["var(--font-outfit)", "sans-serif"],

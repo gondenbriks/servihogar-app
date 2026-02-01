@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { exportToExcel } from '../../lib/export-utils';
+import Background from '../../components/design/Background';
+import NeonButton from '../../components/design/NeonButton';
 
 type FilterType = 'all' | 'expired' | 'upcoming' | 'ok';
 
@@ -345,8 +347,9 @@ export default function ClientsPage() {
     };
 
     return (
-        <div className="bg-[#0a0c10] min-h-screen text-white pb-32 max-w-md mx-auto relative font-sans">
-            <header className="sticky top-0 z-40 bg-[#0a0c10]/95 backdrop-blur-md pt-6 pb-4 px-6 border-b border-white/5 transition-all">
+        <div className="bg-background min-h-screen text-white pb-32 max-w-md mx-auto relative font-outfit">
+            <Background />
+            <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md pt-6 pb-4 px-6 border-b border-white/5 transition-all">
                 <div className="flex justify-between items-center mb-6">
                     {isSelectionMode ? (
                         <div className="flex items-center gap-4 w-full">
@@ -429,16 +432,16 @@ export default function ClientsPage() {
                                 { id: 'upcoming', label: 'Próximos', count: stats.upcoming, color: 'text-amber-500' },
                                 { id: 'ok', label: 'Al día', count: stats.ok, color: 'text-emerald-500' }
                             ].map(tab => (
-                                <button
+                                <NeonButton
                                     key={tab.id}
                                     onClick={() => setActiveFilter(tab.id as any)}
-                                    className={`shrink-0 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] border transition-all ${activeFilter === tab.id
-                                        ? 'bg-white text-black border-white'
-                                        : `bg-gray-900 border-white/5 ${tab.color || 'text-gray-500'}`
+                                    className={`shrink-0 !px-4 !py-2 !rounded-xl !text-[10px] !tracking-widest !border transition-all ${activeFilter === tab.id
+                                        ? '!bg-white !text-black !border-white'
+                                        : `!bg-gray-900 !border-white/5 ${tab.color || '!text-gray-500'}`
                                         }`}
                                 >
                                     {tab.label} ({tab.count})
-                                </button>
+                                </NeonButton>
                             ))}
                         </div>
                     </div>

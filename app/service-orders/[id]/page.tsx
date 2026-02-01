@@ -34,6 +34,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import SignatureCanvas from '../../../components/SignatureCanvas';
+import Background from '../../../components/design/Background';
+import NeonButton from '../../../components/design/NeonButton';
 
 
 // Initialize Gemini
@@ -332,16 +334,17 @@ export default function ServiceOrderPage() {
     };
 
     if (isLoading) return (
-        <div className="bg-[#0a0c10] min-h-screen flex flex-col items-center justify-center text-white">
+        <div className="bg-background min-h-screen flex flex-col items-center justify-center text-white">
             <div className="w-12 h-12 border-4 border-[#135bec]/30 border-t-[#135bec] rounded-full animate-spin mb-4"></div>
             <p className="text-sm font-bold opacity-50">Cargando detalles del servicio...</p>
         </div>
     );
 
     return (
-        <div className="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto shadow-2xl overflow-hidden bg-[#0a0c10] font-sans text-white border-x border-white/5">
+        <div className="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto shadow-2xl overflow-hidden bg-background font-outfit text-white border-x border-white/5">
+            <Background />
             {/* Phase-based Header */}
-            <header className="sticky top-0 z-[60] flex items-center justify-between bg-[#0a0c10]/95 backdrop-blur-md p-4 border-b border-white/5">
+            <header className="sticky top-0 z-[60] flex items-center justify-between bg-background/95 backdrop-blur-md p-4 border-b border-white/5">
                 <button
                     onClick={() => router.back()}
                     className="flex size-10 items-center justify-center rounded-2xl bg-white/5 hover:bg-white/10 transition-colors"
@@ -372,7 +375,7 @@ export default function ServiceOrderPage() {
                         <div className="relative h-48 w-full group overflow-hidden">
                             {/* Fake Map Section */}
                             <div className="absolute inset-0 bg-[url('https://www.google.com/maps/d/u/0/thumbnail?mid=1S95_X_M0Hk4q9C7E5N_W5J9t-s0&msa=0')] bg-cover bg-center grayscale opacity-40 group-hover:opacity-60 transition-opacity" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0c10] to-transparent" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
 
                             <motion.button
                                 whileTap={{ scale: 0.95 }}
@@ -444,16 +447,15 @@ export default function ServiceOrderPage() {
 
                             {/* Main Actions Area */}
                             <div className="space-y-4 pt-6 pb-10">
-                                <motion.button
-                                    whileTap={{ scale: 0.98 }}
+                                <NeonButton
                                     onClick={generateWhatsAppMessage}
-                                    className="w-full py-5 bg-[#135bec] hover:bg-blue-600 rounded-[1.8rem] text-white font-black flex items-center justify-center gap-4 shadow-[0_15px_40px_rgba(19,91,236,0.3)] transition-all group"
+                                    className="w-full justify-center !text-[#135bec] !border-[#135bec] hover:!bg-[#135bec] hover:!text-white"
                                 >
                                     <div className="size-8 rounded-xl bg-white/10 flex items-center justify-center group-hover:rotate-12 transition-transform">
                                         <CheckCircle size={20} />
                                     </div>
-                                    <span className="uppercase tracking-[0.2em] text-sm">Validar y Confirmar</span>
-                                </motion.button>
+                                    <span className="uppercase tracking-[0.2em] text-sm font-bold ml-2">Validar y Confirmar</span>
+                                </NeonButton>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <motion.button
@@ -611,15 +613,13 @@ export default function ServiceOrderPage() {
                                             />
                                         )}
                                     </div>
-                                    <motion.button
-                                        whileTap={{ scale: 0.95 }}
+                                    <NeonButton
                                         onClick={handleAiRecommendations}
-                                        disabled={isGenerating}
-                                        className="w-full bg-gradient-to-r from-[#135bec] to-indigo-600 py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-[#135bec]/20 disabled:opacity-50"
+                                        className="w-full justify-center !text-[#00ff9d] !border-[#00ff9d] hover:!bg-[#00ff9d] hover:!text-black"
                                     >
-                                        <Sparkles size={18} className="text-[#00ff9d]" />
-                                        <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Sugerir Cuidado del Equipo</span>
-                                    </motion.button>
+                                        <Sparkles size={18} />
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] ml-2">Sugerir Cuidado del Equipo</span>
+                                    </NeonButton>
                                 </div>
                             </section>
 
@@ -743,22 +743,19 @@ export default function ServiceOrderPage() {
                                         <p className="text-xs font-bold text-gray-400">${selectedParts.reduce((acc, p) => acc + (p.unit_price * p.quantity), 0).toLocaleString()}</p>
                                     </div>
                                 </div>
-                                <motion.button
-                                    whileTap={{ scale: 0.95 }}
+                                <NeonButton
                                     onClick={handleFinishOrder}
-                                    disabled={isSaving}
-                                    className="w-full bg-[#135bec] text-white font-black py-5 px-8 rounded-[2rem] shadow-[0_20px_40px_rgba(19,91,236,0.3)] transition-all flex items-center justify-center gap-4 relative overflow-hidden group"
+                                    className="w-full justify-center !text-[#135bec] !border-[#135bec] hover:!bg-[#135bec] hover:!text-white"
                                 >
                                     {isSaving ? (
                                         <div className="size-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
                                     ) : (
                                         <>
-                                            <span className="text-sm uppercase tracking-[0.3em]">Cerrar y Facturar</span>
-                                            <CreditCard size={20} />
-                                            <motion.div className="absolute inset-0 bg-white/10 -translate-x-full group-hover:translate-x-full transition-transform duration-700 skew-x-12" />
+                                            <span className="text-sm uppercase tracking-[0.3em] font-bold">Cerrar y Facturar</span>
+                                            <CreditCard size={20} className="ml-2" />
                                         </>
                                     )}
-                                </motion.button>
+                                </NeonButton>
                             </div>
                         </div>
                     </motion.div>
